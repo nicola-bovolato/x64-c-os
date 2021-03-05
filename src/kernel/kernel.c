@@ -1,4 +1,5 @@
 #include "tty.h"
+#include "printf.h"
 
 #if defined(__linux__)
 #error "Not using a cross compiler"
@@ -12,5 +13,5 @@
 void kernel_main(){
     clear_screen();
     set_color(VGA_WHITE, VGA_GREEN);
-    print_line("OK!");
+    printf("OK!");
 }
