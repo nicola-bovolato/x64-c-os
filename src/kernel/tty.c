@@ -5,12 +5,13 @@
 #include <stdint.h>
 #include <stddef.h>
 
-static uint16_t *const vga_mem_end = (uint16_t*)VGA_MEM + (VGA_ROWS * VGA_COLS - 1) * 2;
+static uint16_t *const vga_mem_end = (uint16_t*)(VGA_MEM + (VGA_ROWS * VGA_COLS - 1) * 2);
 
 static uint16_t *cursor = (uint16_t*)VGA_MEM;
 static uint8_t vga_color = VGA_BLACK << 4 | VGA_WHITE;
 
 static inline void print_char_internal(char to_print);
+static inline void scroll(int rows);
 
 static inline void  set_row(size_t row);
 static inline void  set_col(size_t col);
@@ -24,7 +25,7 @@ void set_color(vga_colors foreground, vga_colors background) {
 
 void clear_screen(){
     // Fills screen with whitespace characters
-    for( uint16_t *pointer = (uint16_t*) VGA_MEM; pointer < vga_mem_end; pointer++ ) {
+    for(uint16_t *pointer = (uint16_t*) VGA_MEM; pointer <= vga_mem_end; pointer++) {
         *pointer = (VGA_BLACK << 4 | VGA_WHITE) << 8 | 0x20;
     }
 
@@ -44,14 +45,23 @@ void print(char* str) {
 
 void print_line(char* str) {
     print(str);
-    set_row(get_row() + 1);
+
+    //if the cursor is at the last row scroll the screen, else go to then next row
+    if(get_row() == VGA_ROWS - 1) scroll(1);
+    else set_row(get_row() + 1);
+
     set_col(0);
 }
 
 static inline void print_char_internal(char to_print) {
     *cursor = vga_color << 8 | to_print;
-    // if the end of the vga memory has been reached return the cursor pointer to the start of the screen
-    cursor = (cursor < vga_mem_end) ? cursor + 1 : (uint16_t*) VGA_MEM;
+
+    // if the end of the vga memory has been reached scroll and set the cursor back to the first column
+    if(cursor == vga_mem_end){
+        scroll(1);
+        set_col(0);
+    }
+    else cursor++;
 }
 
 static inline void set_row(size_t row) {
@@ -79,4 +89,25 @@ static inline size_t get_row() {
 static inline size_t get_col() {
     // gets the offset and subtracts the offset of the current row (/2 because each character occupies 2 bytes)
     return ((size_t) cursor - VGA_MEM - (get_row() * VGA_COLS * 2)) / 2;
+}
+
+// Copies memory in the vga buffer, making the screen text scroll
+static inline void scroll(int rows){
+
+    // If the rows to scroll are more than the screen size, then clear the screen
+    if(rows > VGA_ROWS - 1){
+        clear_screen();
+        return;
+    }
+
+    // Calculate how many bits to copy
+    size_t to_copy = (VGA_ROWS * VGA_COLS * 2) - (rows * VGA_COLS * 2);
+
+    // Copies the bits from a specified row to the first one
+    memcpy((uint16_t*) (VGA_MEM + (VGA_COLS * rows * 2)), (uint16_t*)VGA_MEM, to_copy);
+
+    // Clears the remaining bottom rows
+    for(uint16_t *pointer = VGA_MEM + to_copy; pointer <= vga_mem_end; pointer++){
+        *pointer = (VGA_BLACK << 4 | VGA_WHITE) << 8 | 0x20;
+    }
 }
