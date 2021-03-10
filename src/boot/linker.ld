@@ -5,12 +5,16 @@ SECTIONS {
 
     .boot :
     {
-        /* ensure that the multiboot header is at the beginning */
-        *(.multiboot_header)
+        /* ensure that the multiboot header is at the beginning of the binary */
+        KEEP(*(.multiboot_header))
     }
 
     .text :
     {
-        *(.text)
+        *(.text .text.*)
+    }
+
+    .rodata : {
+        *(.rodata .rodata.*)
     }
 }
