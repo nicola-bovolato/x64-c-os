@@ -1,6 +1,6 @@
 #include "tty.h"
 
-#include "mem.h"
+#include "../lib/mem.h"
 
 #include <stdint.h>
 #include <stddef.h>

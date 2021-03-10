@@ -1,6 +1,6 @@
-#include "tty.h"
-#include "printf.h"
-#include "multiboot2.h"
+#include "./drivers/tty.h"
+#include "./lib/printf.h"
+#include "./boot/multiboot2.h"
 
 #include <stddef.h>
 

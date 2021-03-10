@@ -8,8 +8,8 @@ CCFLAGS  = -g -std=c99 -ffreestanding -mno-red-zone -nostdlib -O2 -Wall -Wextra
 
 ASM_SRC   := $(wildcard src/boot/*.asm)
 ASM_OBJ   := $(patsubst src/%.asm, build/%.o, $(ASM_SRC))
-C_HEADERS := $(wildcard src/kernel/*.h)
-C_SRC	  := $(wildcard src/kernel/*.c)
+C_HEADERS := $(wildcard src/kernel/*.h src/kernel/**/*.h)
+C_SRC	  := $(wildcard src/kernel/*.c src/kernel/**/*.c)
 C_OBJ     := $(patsubst src/%.c,   build/%.o, $(C_SRC))
 GRUB_CFG  := src/boot/grub.cfg
 LDFILE    := src/boot/linker.ld

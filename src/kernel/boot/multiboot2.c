@@ -1,6 +1,6 @@
 #include "multiboot2.h"
 
-#include "printf.h"
+#include "../lib/printf.h"
 
 #include <stdbool.h>
 
