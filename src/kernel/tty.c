@@ -104,10 +104,10 @@ static inline void scroll(int rows){
     size_t to_copy = (VGA_ROWS * VGA_COLS * 2) - (rows * VGA_COLS * 2);
 
     // Copies the bits from a specified row to the first one
-    memcpy((uint16_t*) (VGA_MEM + (VGA_COLS * rows * 2)), (uint16_t*)VGA_MEM, to_copy);
+    memcpy((uint16_t*) ((size_t)VGA_MEM + (VGA_COLS * rows * 2)), (uint16_t*)VGA_MEM, to_copy);
 
     // Clears the remaining bottom rows
-    for(uint16_t *pointer = VGA_MEM + to_copy; pointer <= vga_mem_end; pointer++){
+    for(uint16_t *pointer = (uint16_t*)(VGA_MEM + to_copy); pointer <= vga_mem_end; pointer++){
         *pointer = (VGA_BLACK << 4 | VGA_WHITE) << 8 | 0x20;
     }
 }
