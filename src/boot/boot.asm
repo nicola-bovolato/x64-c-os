@@ -12,7 +12,7 @@ bits 32
 
 start:
     mov esp, stack_top  ; Update the stack pointer
-    mov edi, ebx        ; Move Multiboot info pointer (stored in ebx at startup) to edi
+    mov edi, ebx        ; Move Multiboot info pointer (stored in ebx at startup) to edi, to read it from kernel_main
 
     clear_screen
 
