@@ -26,32 +26,39 @@ void printf(char *str, ...) {
 
             switch(*++str) {
                 case 'i':
-                case 'd':
-                    print_uint(va_arg(args, int), num_buf);
-                    break;
+                case 'd': {
+                    volatile int num = va_arg(args, int);
+                    print_int(num, num_buf);
+                } break;
 
-                case 'u':
-                    print_uint(va_arg(args, unsigned int), num_buf);
-                    break;
+                case 'u': {
+                    volatile unsigned int num = va_arg(args, unsigned int);
+                    print_uint(num, num_buf);
+                } break;
 
-                case 'x':
-                    print_uint_hex(va_arg(args, unsigned int), num_buf);
-                    break;
+                case 'x': {
+                    volatile unsigned int num = va_arg(args, unsigned int);
+                    print_uint_hex(num, num_buf);
+                } break;
 
-                case 'p':
-                    print_ulong_hex(va_arg(args, unsigned long), num_buf);
-                    break;
+                case 'p': {
+                    volatile unsigned long num = va_arg(args, unsigned long);
+                    print_ulong_hex(num, num_buf);
+                } break;
 
-                case 'c':
-                    print_char(va_arg(args, int));
-                    break;
+                case 'c': {
+                    volatile unsigned char c = va_arg(args, int);
+                    print_char(c);
+                } break;
 
-                case 's':
-                    print(va_arg(args, char*));
-                    break;
+                case 's': {
+                    char* s = va_arg(args, char*);
+                    print(s);
+                } break;
 
                 case '%':
                     print_char('%');
+                    break;
             }
         }
         else switch(*str) {
@@ -85,9 +92,7 @@ static inline void print_uint (unsigned int num, char* buf) {
 }
 
 static inline void print_uint_hex (unsigned int num, char* buf) {
-    buf[0] = '0';
-    buf[1] = 'x';
-    utoa(num, buf + 2, 16);
+    utoa(num, buf, 16);
     print(buf);
 }
 
