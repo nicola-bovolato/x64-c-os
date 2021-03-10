@@ -18,8 +18,8 @@ int strlen(const char *str) {
 int strcmp(const char *str_1, const char *str_2) {
 
     while(*str_1 != '\0' && *str_1 == *str_2) {
-        *str_1++;
-        *str_2++;
+        str_1++;
+        str_2++;
     }
 
     return *(const unsigned char*) str_1 - *(const unsigned char*) str_2;
@@ -67,7 +67,7 @@ void itoa(int number, char *dest, unsigned int base){
 }
 
 void ltoa(long number, char *dest, unsigned int base){
-    int i;
+    int i = 0;
     bool neg = number < 0;
 
     if(neg) number = -number;
