@@ -4,8 +4,8 @@
 
 #include <stdbool.h>
 
-typedef void     (*print_tag_t)(struct multiboot_tag*);
-typedef uint8_t* (*get_ptr_t)  (struct multiboot_tag*);
+typedef void     (*print_tag_t)(multiboot_tag_t*);
+typedef uint8_t* (*get_ptr_t)  (multiboot_tag_t*);
 
 static uint32_t* multiboot_info_address = (uint32_t*) -1;
 
@@ -13,15 +13,15 @@ static inline bool is_aligned();
 static inline bool is_initialized();
 static inline bool valid_address();
 
-static inline void print_tag_memory                     (struct multiboot_tag* tag);
-static inline void print_tag_mmap                       (struct multiboot_tag* tag);
-static inline void print_tag_mmap_available             (struct multiboot_tag* tag);
-static inline void print_tag_elf_section                (struct multiboot_tag* tag);
-static inline void print_tag_elf_section_used           (struct multiboot_tag* tag);
+static inline void print_tag_memory                     (multiboot_tag_t* tag);
+static inline void print_tag_mmap                       (multiboot_tag_t* tag);
+static inline void print_tag_mmap_available             (multiboot_tag_t* tag);
+static inline void print_tag_elf_section                (multiboot_tag_t* tag);
+static inline void print_tag_elf_section_used           (multiboot_tag_t* tag);
 static inline void print_filtered_tags                  (uint32_t tag_type, print_tag_t print_tag);
 
-static inline uint8_t* get_elf_section_kernel_min_ptr   (struct multiboot_tag*);
-static inline uint8_t* get_elf_section_kernel_max_ptr   (struct multiboot_tag*);
+static inline uint8_t* get_elf_section_kernel_min_ptr   (multiboot_tag_t*);
+static inline uint8_t* get_elf_section_kernel_max_ptr   (multiboot_tag_t*);
 static inline uint8_t* get_ptr_from_tag                 (uint32_t tag_type, get_ptr_t get_ptr);
 
 void set_multiboot_info_address(uint32_t* address)
@@ -57,6 +57,7 @@ uint8_t* get_multiboot_memory_multiboot_start() {
 
 uint8_t* get_multiboot_memory_multiboot_end() {
     if(valid_address()) {
+        // the first 4 bytes pointed by the multiboot info address are the multiboot header length
         return (uint8_t*)multiboot_info_address + *(multiboot_info_address);
     }
     return (uint8_t*) -1;
@@ -136,16 +137,16 @@ static inline bool valid_address(){
     return is_initialized() && is_aligned();
 }
 
-static inline void print_tag_memory(struct multiboot_tag* tag){
+static inline void print_tag_memory(multiboot_tag_t* tag){
 
-    struct multiboot_tag_basic_meminfo *mem = ((struct multiboot_tag_basic_meminfo *) tag);
+    multiboot_tag_basic_meminfo_t *mem = (multiboot_tag_basic_meminfo_t *) tag;
 
     printf("\tmem_lower: %uKB, mem_higher: %uKB\n", mem->mem_lower, mem->mem_upper);
 }
 
-static inline void print_tag_mmap(struct multiboot_tag* tag){
+static inline void print_tag_mmap(multiboot_tag_t* tag){
 
-    struct multiboot_mmap_entry *mmap = (struct multiboot_mmap_entry *) ((struct multiboot_tag_mmap *)tag)->entries;
+    multiboot_mmap_entry_t *mmap = (multiboot_mmap_entry_t *) ((multiboot_tag_mmap_t *)tag)->entries;
 
     while((uint8_t*)mmap < (uint8_t*)tag + tag->size) {
         printf("\taddress: %p, length: %p\n", mmap->addr, mmap->len);
@@ -153,9 +154,9 @@ static inline void print_tag_mmap(struct multiboot_tag* tag){
     }
 }
 
-static inline void print_tag_mmap_available(struct multiboot_tag* tag){
+static inline void print_tag_mmap_available(multiboot_tag_t* tag){
 
-    struct multiboot_mmap_entry *mmap = (struct multiboot_mmap_entry *) ((struct multiboot_tag_mmap *)tag)->entries;
+    multiboot_mmap_entry_t *mmap = (multiboot_mmap_entry_t *) ((multiboot_tag_mmap_t *)tag)->entries;
 
     while((uint8_t*)mmap < (uint8_t*)tag + tag->size) {
         if(mmap->type == MULTIBOOT_MEMORY_AVAILABLE)
@@ -164,10 +165,10 @@ static inline void print_tag_mmap_available(struct multiboot_tag* tag){
     }
 }
 
-static inline void print_tag_elf_section(struct multiboot_tag* tag){
+static inline void print_tag_elf_section(multiboot_tag_t* tag){
 
-    struct multiboot_elf_section* section = (struct multiboot_elf_section *) ((struct multiboot_tag_elf_sections*)tag)->sections;
-    int remaining = ((struct multiboot_tag_elf_sections*)tag)->num;
+    multiboot_elf_section_t* section = (multiboot_elf_section_t *) ((multiboot_tag_elf_sections_t*)tag)->sections;
+    int remaining = ((multiboot_tag_elf_sections_t*)tag)->num;
 
     while(remaining > 0){
         printf("\taddress: %p, size: %p, flags: %p\n", section->address, section->size, section->flags);
@@ -176,10 +177,10 @@ static inline void print_tag_elf_section(struct multiboot_tag* tag){
     }
 }
 
-static inline void print_tag_elf_section_used(struct multiboot_tag* tag){
+static inline void print_tag_elf_section_used(multiboot_tag_t* tag){
 
-    struct multiboot_elf_section* section = (struct multiboot_elf_section *) ((struct multiboot_tag_elf_sections*)tag)->sections;
-    int remaining = ((struct multiboot_tag_elf_sections*)tag)->num;
+    multiboot_elf_section_t* section = (multiboot_elf_section_t *) ((multiboot_tag_elf_sections_t*)tag)->sections;
+    int remaining = ((multiboot_tag_elf_sections_t*)tag)->num;
 
     while(remaining > 0){
         if(section->type != MULTIBOOT_ELF_SECTION_UNUSED)
@@ -189,21 +190,22 @@ static inline void print_tag_elf_section_used(struct multiboot_tag* tag){
     }
 }
 
+// To avoid repeating code this function iterates through tags, and executes a printing function on a specific type tag when reached
 static inline void print_filtered_tags(uint32_t tag_type, print_tag_t print_tag){
 
     //skips the first 8 bytes of the header: (total_size and reserved)
-    struct multiboot_tag *tag = (struct multiboot_tag *)(multiboot_info_address + 2);
+    multiboot_tag_t *tag = (multiboot_tag_t *)(multiboot_info_address + 2);
 
     while(tag->type != MULTIBOOT_TAG_TYPE_END) {
         if(tag->type == tag_type) print_tag(tag);
-        tag = (struct multiboot_tag *)((uint8_t *)tag + ((tag->size + 7) & ~7));
+        tag = (multiboot_tag_t *)((uint8_t *)tag + ((tag->size + 7) & ~7));
     }
 }
 
-static inline uint8_t* get_elf_section_kernel_min_ptr(struct multiboot_tag* tag){
+static inline uint8_t* get_elf_section_kernel_min_ptr(multiboot_tag_t* tag){
 
-    struct multiboot_elf_section* section = (struct multiboot_elf_section *) ((struct multiboot_tag_elf_sections*)tag)->sections;
-    int remaining = ((struct multiboot_tag_elf_sections*)tag)->num;
+    multiboot_elf_section_t* section = (multiboot_elf_section_t *) ((multiboot_tag_elf_sections_t*)tag)->sections;
+    int remaining = ((multiboot_tag_elf_sections_t*)tag)->num;
 
     uint8_t* min = (uint8_t*) -1;
 
@@ -218,10 +220,10 @@ static inline uint8_t* get_elf_section_kernel_min_ptr(struct multiboot_tag* tag)
     return min;
 }
 
-static inline uint8_t* get_elf_section_kernel_max_ptr(struct multiboot_tag* tag){
+static inline uint8_t* get_elf_section_kernel_max_ptr(multiboot_tag_t* tag){
 
-    struct multiboot_elf_section* section = (struct multiboot_elf_section *) ((struct multiboot_tag_elf_sections*)tag)->sections;
-    int remaining = ((struct multiboot_tag_elf_sections*)tag)->num;
+    multiboot_elf_section_t* section = (multiboot_elf_section_t *) ((multiboot_tag_elf_sections_t*)tag)->sections;
+    int remaining = ((multiboot_tag_elf_sections_t*)tag)->num;
 
     uint8_t* max = (uint8_t*) 0;
 
@@ -236,14 +238,15 @@ static inline uint8_t* get_elf_section_kernel_max_ptr(struct multiboot_tag* tag)
     return max;
 }
 
+// To avoid repeating code this function iterates through tags, and returns the get_ptr_t function value on a specific tag
 static inline uint8_t* get_ptr_from_tag(uint32_t tag_type, get_ptr_t get_ptr){
 
     //skips the first 8 bytes of the header: (total_size and reserved)
-    struct multiboot_tag *tag = (struct multiboot_tag *)(multiboot_info_address + 2);
+    multiboot_tag_t *tag = (multiboot_tag_t *)(multiboot_info_address + 2);
 
     while(tag->type != MULTIBOOT_TAG_TYPE_END) {
         if(tag->type == tag_type) return get_ptr(tag);
-        tag = (struct multiboot_tag *)((uint8_t *)tag + ((tag->size + 7) & ~7));
+        tag = (multiboot_tag_t *)((uint8_t *)tag + ((tag->size + 7) & ~7));
     }
 
     return (uint8_t*) -1;

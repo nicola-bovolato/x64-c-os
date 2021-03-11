@@ -1,3 +1,8 @@
+/*
+** More information on the multiboot2 specification here:
+** https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html
+*/
+
 #ifndef MULTIBOOT_H
 #define MULTIBOOT_H
 
@@ -19,6 +24,7 @@ void print_multiboot_info_memory();
 void print_multiboot_info_kernel_memory_region();
 void print_multiboot_info_multiboot_memory_region();
 
+// Available multiboot info tags
 #define MULTIBOOT_TAG_TYPE_END               0
 #define MULTIBOOT_TAG_TYPE_CMDLINE           1
 #define MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME  2
@@ -44,7 +50,9 @@ void print_multiboot_info_multiboot_memory_region();
 
 #define MULTIBOOT_HEADER_TAG_END  0
 
-struct multiboot_mmap_entry
+// Multiboot Structures
+
+typedef struct
 {
   uint64_t addr;
   uint64_t len;
@@ -55,9 +63,10 @@ struct multiboot_mmap_entry
 #define MULTIBOOT_MEMORY_BADRAM                 5
   uint32_t type;
   uint32_t zero;
-};
+}
+multiboot_mmap_entry_t;
 
-struct multiboot_elf_section
+typedef struct
 {
   uint32_t name;
 #define MULTIBOOT_ELF_SECTION_UNUSED                        0
@@ -81,41 +90,46 @@ struct multiboot_elf_section
   uint32_t info;
   uint64_t address_align;
   uint64_t entry_size;
-};
+}
+multiboot_elf_section_t;
 
-struct multiboot_tag
+typedef struct
 {
   uint32_t type;
   uint32_t size;
-};
+}
+multiboot_tag_t;
 
-struct multiboot_tag_basic_meminfo
+typedef struct
 {
   uint32_t type;
   uint32_t size;
   uint32_t mem_lower;
   uint32_t mem_upper;
-};
+}
+multiboot_tag_basic_meminfo_t;
 
-struct multiboot_tag_bootdev
+typedef struct
 {
   uint32_t type;
   uint32_t size;
   uint32_t biosdev;
   uint32_t slice;
   uint32_t part;
-};
+}
+multiboot_tag_bootdev_t;
 
-struct multiboot_tag_mmap
+typedef struct
 {
   uint32_t type;
   uint32_t size;
   uint32_t entry_size;
   uint32_t entry_version;
   uint8_t  entries[];
-};
+}
+multiboot_tag_mmap_t;
 
-struct multiboot_tag_elf_sections
+typedef struct
 {
   uint32_t type;
   uint32_t size;
@@ -123,6 +137,7 @@ struct multiboot_tag_elf_sections
   uint32_t entsize;
   uint32_t shndx;
   uint8_t  sections[];
-};
+}
+multiboot_tag_elf_sections_t;
 
 #endif
