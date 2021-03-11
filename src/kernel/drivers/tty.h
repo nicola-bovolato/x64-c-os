@@ -5,8 +5,6 @@
 #define VGA_COLS        80
 #define VGA_ROWS        25
 
-#define WHITE_ON_BLACK  0x0f
-
 typedef enum {
     VGA_BLACK         = 0x0,
 	VGA_BLUE          = 0x1,
