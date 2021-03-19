@@ -4,7 +4,7 @@ CC = /usr/local/x86_64-elf-gcc/bin/x86_64-elf-gcc
 
 ASMFLAGS = -f elf64 -I src/boot
 LDFLAGS  = --nmagic # Disables automatic section alignment
-CCFLAGS  = -g -std=c99 -ffreestanding -mno-red-zone -nostdlib -O2 -Wall -Wextra
+CCFLAGS  = -g -std=c99 -ffreestanding -mno-red-zone -nostdlib -O0 -Wall -Wextra
 
 ASM_SRC   := $(wildcard src/boot/*.asm)
 ASM_OBJ   := $(patsubst src/%.asm, build/%.o, $(ASM_SRC))
