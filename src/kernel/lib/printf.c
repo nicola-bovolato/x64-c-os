@@ -41,7 +41,7 @@ void printf(char *str, ...) {
                     break;
 
                 case 'p':
-                    print_ulong_hex(va_arg(args, void*));
+                    print_ulong_hex((unsigned long)va_arg(args, void*));
                     break;
 
                 case 'c':
