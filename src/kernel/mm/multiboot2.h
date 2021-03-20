@@ -9,8 +9,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-void set_multiboot_info_address(uint32_t* address);
+void init_multiboot_info(uint32_t* address);
 
+uint8_t* get_multiboot_memory_start();
+uint8_t* get_multiboot_memory_end();
 uint8_t* get_multiboot_memory_kernel_start();
 uint8_t* get_multiboot_memory_kernel_end();
 uint8_t* get_multiboot_memory_multiboot_start();

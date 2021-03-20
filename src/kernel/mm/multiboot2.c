@@ -7,11 +7,7 @@
 typedef void     (*print_tag_t)(multiboot_tag_t*);
 typedef uint8_t* (*get_ptr_t)  (multiboot_tag_t*);
 
-static uint32_t* multiboot_info_address = (uint32_t*) -1;
-
-static inline bool is_aligned();
-static inline bool is_initialized();
-static inline bool valid_address();
+static uint32_t* multiboot_info_address = NULL;
 
 static inline void print_tag_memory                     (multiboot_tag_t* tag);
 static inline void print_tag_mmap                       (multiboot_tag_t* tag);
@@ -20,12 +16,16 @@ static inline void print_tag_elf_section                (multiboot_tag_t* tag);
 static inline void print_tag_elf_section_used           (multiboot_tag_t* tag);
 static inline void print_filtered_tags                  (uint32_t tag_type, print_tag_t print_tag);
 
-static inline uint8_t* get_elf_section_kernel_min_ptr   (multiboot_tag_t*);
-static inline uint8_t* get_elf_section_kernel_max_ptr   (multiboot_tag_t*);
+static inline uint8_t* get_meminfo_max_ptr              (multiboot_tag_t* tag);
+static inline uint8_t* get_elf_section_kernel_min_ptr   (multiboot_tag_t* tag);
+static inline uint8_t* get_elf_section_kernel_max_ptr   (multiboot_tag_t* tag);
 static inline uint8_t* get_ptr_from_tag                 (uint32_t tag_type, get_ptr_t get_ptr);
 
-void set_multiboot_info_address(uint32_t* address)
+void init_multiboot_info(uint32_t* address)
 {
+    if(((uint64_t) address) & 0xf == 0) panic("Multiboot address is not aligned");
+    if(address == NULL)                 panic("Multiboot address is not initalized");
+
     multiboot_info_address = address;
 }
 
@@ -34,107 +34,70 @@ uint32_t* get_multiboot_info_address()
     return multiboot_info_address;
 }
 
+uint8_t* get_multiboot_memory_start() {
+    return (uint8_t*) 0;
+}
+
+uint8_t* get_multiboot_memory_end() {
+    return get_ptr_from_tag(MULTIBOOT_TAG_TYPE_BASIC_MEMINFO, get_meminfo_max_ptr);
+}
+
 uint8_t* get_multiboot_memory_kernel_start() {
-    if(valid_address()) {
-        return get_ptr_from_tag(MULTIBOOT_TAG_TYPE_ELF_SECTIONS, get_elf_section_kernel_min_ptr);
-    }
-    return (uint8_t*) -1;
+    return get_ptr_from_tag(MULTIBOOT_TAG_TYPE_ELF_SECTIONS, get_elf_section_kernel_min_ptr);
 }
 
 uint8_t* get_multiboot_memory_kernel_end() {
-    if(valid_address()) {
-        return get_ptr_from_tag(MULTIBOOT_TAG_TYPE_ELF_SECTIONS, get_elf_section_kernel_max_ptr);
-    }
-    return (uint8_t*) -1;
+    return get_ptr_from_tag(MULTIBOOT_TAG_TYPE_ELF_SECTIONS, get_elf_section_kernel_max_ptr);
 }
 
 uint8_t* get_multiboot_memory_multiboot_start() {
-    if(valid_address()) {
-        return (uint8_t*) multiboot_info_address;
-    }
-    return (uint8_t*) -1;
+    return (uint8_t*) multiboot_info_address;
 }
 
 uint8_t* get_multiboot_memory_multiboot_end() {
-    if(valid_address()) {
-        // the first 4 bytes pointed by the multiboot info address are the multiboot header length
-        return (uint8_t*)multiboot_info_address + *(multiboot_info_address);
-    }
-    return (uint8_t*) -1;
+    // the first 4 bytes pointed by the multiboot info address represent the multiboot header length
+    return (uint8_t*)multiboot_info_address + *(multiboot_info_address);
 }
 
 void print_multiboot_info_mmap(){
-    if(valid_address()) {
-        printf("Memory map:\n");
-        print_filtered_tags(MULTIBOOT_TAG_TYPE_MMAP, print_tag_mmap);
-    }
-    else printf("Invalid multiboot address\n");
+    printf("Memory map:\n");
+    print_filtered_tags(MULTIBOOT_TAG_TYPE_MMAP, print_tag_mmap);
 }
 
 void print_multiboot_info_mmap_available(){
-    if(valid_address()) {
-        printf("Memory map (available only):\n");
-        print_filtered_tags(MULTIBOOT_TAG_TYPE_MMAP, print_tag_mmap_available);
-    }
-    else printf("Invalid multiboot address\n");
+    printf("Memory map (available only):\n");
+    print_filtered_tags(MULTIBOOT_TAG_TYPE_MMAP, print_tag_mmap_available);
 }
 
 void print_multiboot_info_elf_sections(){
-    if(valid_address()) {
-        printf("Elf sections:\n");
-        print_filtered_tags(MULTIBOOT_TAG_TYPE_ELF_SECTIONS, print_tag_elf_section);
-    }
-    else printf("Invalid multiboot address\n");
+    printf("Elf sections:\n");
+    print_filtered_tags(MULTIBOOT_TAG_TYPE_ELF_SECTIONS, print_tag_elf_section);
 }
 
 void print_multiboot_info_elf_sections_used(){
-    if(valid_address()) {
-        printf("Elf sections (used only):\n");
-        print_filtered_tags(MULTIBOOT_TAG_TYPE_ELF_SECTIONS, print_tag_elf_section_used);
-    }
-    else printf("Invalid multiboot address\n");
+    printf("Elf sections (used only):\n");
+    print_filtered_tags(MULTIBOOT_TAG_TYPE_ELF_SECTIONS, print_tag_elf_section_used);
 }
 
 void print_multiboot_info_memory(){
-    if(valid_address()) {
-        printf("Memory info:\n");
-        print_filtered_tags(MULTIBOOT_TAG_TYPE_BASIC_MEMINFO, print_tag_memory);
-    }
-    else printf("Invalid multiboot address\n");
+    printf("Memory info:\n");
+    print_filtered_tags(MULTIBOOT_TAG_TYPE_BASIC_MEMINFO, print_tag_memory);
 }
 
 void print_multiboot_info_kernel_memory_region(){
-    if(valid_address()) {
-        printf("Kernel memory region:\n");
+    printf("Kernel memory region:\n");
 
-        uint8_t* start = get_multiboot_memory_kernel_start();
-        uint8_t* end   = get_multiboot_memory_kernel_end();
+    uint8_t* start = get_multiboot_memory_kernel_start();
+    uint8_t* end   = get_multiboot_memory_kernel_end();
 
-        printf("\tkernel_start: %p, kernel_end: %p, size: %uKiB\n", start, end, (size_t) (end - start) / 1024);
-    }
-    else printf("Invalid multiboot address\n");
+    printf("\tkernel_start: %p, kernel_end: %p, size: %uKiB\n", start, end, (size_t) (end - start) / 1024);
 }
 
 void print_multiboot_info_multiboot_memory_region(){
-    if(valid_address()) {
-        printf("Multiboot memory region:\n");
+    printf("Multiboot memory region:\n");
 
-        uint8_t* end_address = (uint8_t*) multiboot_info_address + *(multiboot_info_address);
-        printf("\tmultiboot_start: %p, multiboot_end: %p, size: %uB\n", multiboot_info_address, end_address, (size_t)end_address - (size_t)multiboot_info_address);
-    }
-    else printf("Invalid multiboot address\n");
-}
-
-static inline bool is_aligned(){
-    return (((uint64_t) multiboot_info_address) & 7) == 0;
-}
-
-static inline bool is_initialized(){
-    return multiboot_info_address != (uint32_t*) -1;
-}
-
-static inline bool valid_address(){
-    return is_initialized() && is_aligned();
+    uint8_t* end_address = (uint8_t*) multiboot_info_address + *(multiboot_info_address);
+    printf("\tmultiboot_start: %p, multiboot_end: %p, size: %uB\n", multiboot_info_address, end_address, (size_t)end_address - (size_t)multiboot_info_address);
 }
 
 static inline void print_tag_memory(multiboot_tag_t* tag){
@@ -200,6 +163,13 @@ static inline void print_filtered_tags(uint32_t tag_type, print_tag_t print_tag)
         if(tag->type == tag_type) print_tag(tag);
         tag = (multiboot_tag_t *)((uint8_t *)tag + ((tag->size + 7) & ~7));
     }
+}
+
+static inline uint8_t* get_meminfo_max_ptr(multiboot_tag_t* tag){
+
+    multiboot_tag_basic_meminfo_t *mem = (multiboot_tag_basic_meminfo_t *) tag;
+
+    return (uint8_t*) ((size_t)mem->mem_upper * 1024);
 }
 
 static inline uint8_t* get_elf_section_kernel_min_ptr(multiboot_tag_t* tag){
