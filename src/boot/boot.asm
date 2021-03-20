@@ -95,6 +95,11 @@ error:
     hlt
 
 set_up_page_tables:
+    ; map pml4 table recursively
+    mov eax, pml4_table
+    or eax, 0b11 ; present + writable
+    mov [pml4_table + 511 * 8], eax
+
     ; map first pml4 entry to pdp table
     mov eax, pdp_table
     or eax, 0b11 ; present + writable
@@ -159,7 +164,7 @@ stack_top:
 section .data
     MSG_NO_MULTIBOOT                db "Multiboot not supported", 0
     MSG_NO_CPUID                    db "Cpuid not supported", 0
-    MSG_NO_LONG_MODE                db "Long mode not suported", 0
+    MSG_NO_LONG_MODE                db "Long mode not supported", 0
 
 section .rodata
 gdt64:
