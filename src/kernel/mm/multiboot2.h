@@ -18,14 +18,6 @@ uint8_t* get_multiboot_memory_kernel_end();
 uint8_t* get_multiboot_memory_multiboot_start();
 uint8_t* get_multiboot_memory_multiboot_end();
 
-void print_multiboot_info_mmap();
-void print_multiboot_info_mmap_available();
-void print_multiboot_info_elf_sections();
-void print_multiboot_info_elf_sections_used();
-void print_multiboot_info_memory();
-void print_multiboot_info_kernel_memory_region();
-void print_multiboot_info_multiboot_memory_region();
-
 // Available multiboot info tags
 #define MULTIBOOT_TAG_TYPE_END               0
 #define MULTIBOOT_TAG_TYPE_CMDLINE           1
