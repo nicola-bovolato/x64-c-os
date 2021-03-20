@@ -6,7 +6,7 @@
 
 typedef uint8_t* (*get_ptr_t)  (multiboot_tag_t*);
 
-static uint32_t* multiboot_info_address = (uint32_t*)-1;
+static uint32_t* multiboot_info_ptr = (uint32_t*)-1;
 
 static inline uint8_t* get_meminfo_max_ptr              (multiboot_tag_t* tag);
 static inline uint8_t* get_elf_section_kernel_min_ptr   (multiboot_tag_t* tag);
@@ -17,11 +17,11 @@ void init_multiboot_info(uint32_t* address) {
     if((((uint64_t) address) & 7) != 0) panic("Multiboot address is not aligned");
     if(address == (uint32_t*)-1)        panic("Multiboot address is not initalized");
 
-    multiboot_info_address = address;
+    multiboot_info_ptr = address;
 }
 
-uint32_t* get_multiboot_info_address() {
-    return multiboot_info_address;
+uint32_t* get_multiboot_info_ptr() {
+    return multiboot_info_ptr;
 }
 
 uint8_t* get_multiboot_memory_start() {
@@ -41,12 +41,12 @@ uint8_t* get_multiboot_memory_kernel_end() {
 }
 
 uint8_t* get_multiboot_memory_multiboot_start() {
-    return (uint8_t*) multiboot_info_address;
+    return (uint8_t*) multiboot_info_ptr;
 }
 
 uint8_t* get_multiboot_memory_multiboot_end() {
     // the first 4 bytes pointed by the multiboot info address represent the multiboot header length
-    return (uint8_t*)multiboot_info_address + *(multiboot_info_address);
+    return (uint8_t*)multiboot_info_ptr + *(multiboot_info_ptr);
 }
 
 static inline uint8_t* get_meminfo_max_ptr(multiboot_tag_t* tag){
@@ -96,7 +96,7 @@ static inline uint8_t* get_elf_section_kernel_max_ptr(multiboot_tag_t* tag){
 static inline uint8_t* get_ptr_from_tag(uint32_t tag_type, get_ptr_t get_ptr){
 
     //skips the first 8 bytes of the header: (total_size and reserved)
-    multiboot_tag_t *tag = (multiboot_tag_t *)(multiboot_info_address + 2);
+    multiboot_tag_t *tag = (multiboot_tag_t *)(multiboot_info_ptr + 2);
 
     while(tag->type != MULTIBOOT_TAG_TYPE_END) {
         if(tag->type == tag_type) return get_ptr(tag);
