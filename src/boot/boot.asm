@@ -110,6 +110,9 @@ set_up_page_tables:
     or eax, 0b11 ; present + writable
     mov [pdp_table], eax
 
+    ; the first gigabyte of memory will be identity mapped
+.identity_map_1st_GiB:
+
     ; map each pd table entry to the respective pt table address
     mov ecx, 0  ; counter variable
 
@@ -135,7 +138,7 @@ set_up_page_tables:
     or eax, 0b11        ; present + writable
     mov [pt_table + ecx * 8], eax   ; map ecx-th entry (the pt tables are declared in a contiguous memory region)
 
-inc ecx                 ; increase counter
+    inc ecx             ; increase counter
     cmp ecx, 512 * 512  ; if counter == 512 * 512, each entry of each pt table is mapped
     jne .map_512_pt_tables   ; else map the next entry
 
