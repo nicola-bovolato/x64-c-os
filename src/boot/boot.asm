@@ -110,19 +110,34 @@ set_up_page_tables:
     or eax, 0b11 ; present + writable
     mov [pdp_table], eax
 
-    ; map each pd entry to a huge 2MiB page
-    mov ecx, 0         ; counter variable
+    ; map each pd table entry to the respective pt table address
+    mov ecx, 0  ; counter variable
 
 .map_pd_table:
-    ; map ecx-th pd entry to a huge page that starts at address 2MiB*ecx
-    mov eax, 0x200000  ; 2MiB
-    mul ecx            ; start address of ecx-th page
-    or eax, 0b10000011 ; present + writable + huge
-    mov [pd_table + ecx * 8], eax ; map ecx-th entry
 
-    inc ecx            ; increase counter
-    cmp ecx, 512       ; if counter == 512, the whole pd table is mapped
-    jne .map_pd_table  ; else map the next entry
+    mov eax, 4096       ; the size of a pt table
+    mul ecx             ; multiply the size by a counter, to get the index of the nth table
+    add eax, pt_table   ; add the offset of the first pt_table
+    or eax, 0b11        ; present + writable
+    mov [pd_table + ecx * 8], eax
+
+    inc ecx             ; increase counter
+    cmp ecx, 512        ; check if all the table entries have been mapped
+    jne .map_pd_table
+
+    ; identity map each entry of each pt table to a 4KiB frame
+    mov ecx, 0          ; counter variable
+
+.map_512_pt_tables:
+
+    mov eax, 0x1000
+    mul ecx             ; start address of ecx-th page
+    or eax, 0b11        ; present + writable
+    mov [pt_table + ecx * 8], eax   ; map ecx-th entry (the pt tables are declared in a contiguous memory region)
+
+inc ecx                 ; increase counter
+    cmp ecx, 512 * 512  ; if counter == 512 * 512, each entry of each pt table is mapped
+    jne .map_512_pt_tables   ; else map the next entry
 
     ret
 
@@ -157,6 +172,8 @@ pdp_table:
     resb 4096
 pd_table:
     resb 4096
+pt_table:
+    resb 4096 * 512   ; Reserve space for 512 page tables
 stack_bottom:
     resb 4096 * 4     ; Reserve 16 kBytes for the kernel stack
 stack_top:
