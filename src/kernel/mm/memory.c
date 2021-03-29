@@ -4,23 +4,19 @@
 
 #define MAX_USED_REGIONS 10
 
-typedef struct {
-    uint8_t* start;
-    uint8_t* end;
-} mem_region_t;
-
 mem_region_t used_regions[MAX_USED_REGIONS];
 size_t used_regions_size = 0;
 
-uint8_t* free_frame = 0x0;
+uint8_t* free_frame = (uint8_t*) -1;
 uint8_t* end_of_memory = 0x0;
 
-void init_frame_allocator(void* mem_end) {
-    end_of_memory = (uint8_t*) mem_end;
+void init_frame_allocator(mem_region_t mem) {
+    free_frame = mem.start;
+    end_of_memory = mem.end;
 }
 
-void frame_allocator_add_used_memory_region(void* mem_start, void* mem_end) {
-    used_regions[used_regions_size] = (mem_region_t) {(uint8_t*) mem_start, (uint8_t*) mem_end};
+void frame_allocator_add_used_memory_region(mem_region_t mem) {
+    used_regions[used_regions_size] = mem;
     used_regions_size++;
     if(used_regions_size > MAX_USED_REGIONS) panic("Used memory regions exceed maximum allowed");
 }

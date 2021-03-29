@@ -24,9 +24,9 @@ void kernel_main(uint32_t* multiboot_header) {
 
     init_multiboot_info(multiboot_header);
 
-    init_frame_allocator(get_multiboot_memory_end());
-    frame_allocator_add_used_memory_region(get_multiboot_memory_kernel_start(), get_multiboot_memory_kernel_end());
-    frame_allocator_add_used_memory_region(get_multiboot_memory_multiboot_start(), get_multiboot_memory_multiboot_end());
+    init_frame_allocator(get_mem_region());
+    frame_allocator_add_used_memory_region(get_kernel_mem_region());
+    frame_allocator_add_used_memory_region(get_multiboot_mem_region());
 
 
     printf("Page allocation test:\n");

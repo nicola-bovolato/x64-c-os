@@ -9,14 +9,44 @@
 #include <stddef.h>
 #include <stdint.h>
 
-void init_multiboot_info(uint32_t* address);
+#include "memory.h"
 
-uint8_t* get_multiboot_memory_start();
-uint8_t* get_multiboot_memory_end();
-uint8_t* get_multiboot_memory_kernel_start();
-uint8_t* get_multiboot_memory_kernel_end();
-uint8_t* get_multiboot_memory_multiboot_start();
-uint8_t* get_multiboot_memory_multiboot_end();
+typedef struct
+{
+  uint32_t name;
+#define MULTIBOOT_ELF_SECTION_UNUSED                        0
+#define MULTIBOOT_ELF_SECTION_PROGRAM_SECTION               1
+#define MULTIBOOT_ELF_SECTION_LINKER_SYMBOL_TABLE           2
+#define MULTIBOOT_ELF_SECTION_STRING_TABLE                  3
+#define MULTIBOOT_ELF_SECTION_RELA_RELOCATION               4
+#define MULTIBOOT_ELF_SECTION_SYMBOL_HASH_TABLE             5
+#define MULTIBOOT_ELF_SECTION_DYNAMIC_LINKING_TABLE         6
+#define MULTIBOOT_ELF_SECTION_NOTE                          7
+#define MULTIBOOT_ELF_SECTION_UNINITIALIZED                 8
+#define MULTIBOOT_ELF_SECTION_REL_RELOCATION                9
+#define MULTIBOOT_ELF_SECTION_RESERVED                      10
+#define MULTIBOOT_ELF_SECTION_DYNAMIC_LOADER_SYMBOL_TABLE   11
+  uint32_t type;
+  uint64_t flags;
+  uint64_t address;
+  uint64_t file_offset;
+  uint64_t size;
+  uint32_t link;
+  uint32_t info;
+  uint64_t address_align;
+  uint64_t entry_size;
+}
+multiboot_elf_section_t;
+
+void init_multiboot_info(uint32_t* address);
+uint32_t* get_multiboot_info_ptr();
+
+size_t get_elf_sections_number();
+multiboot_elf_section_t* get_elf_sections();
+
+mem_region_t get_mem_region();
+mem_region_t get_kernel_mem_region();
+mem_region_t get_multiboot_mem_region();
 
 // Available multiboot info tags
 #define MULTIBOOT_TAG_TYPE_END               0
@@ -59,33 +89,6 @@ typedef struct
   uint32_t zero;
 }
 multiboot_mmap_entry_t;
-
-typedef struct
-{
-  uint32_t name;
-#define MULTIBOOT_ELF_SECTION_UNUSED                        0
-#define MULTIBOOT_ELF_SECTION_PROGRAM_SECTION               1
-#define MULTIBOOT_ELF_SECTION_LINKER_SYMBOL_TABLE           2
-#define MULTIBOOT_ELF_SECTION_STRING_TABLE                  3
-#define MULTIBOOT_ELF_SECTION_RELA_RELOCATION               4
-#define MULTIBOOT_ELF_SECTION_SYMBOL_HASH_TABLE             5
-#define MULTIBOOT_ELF_SECTION_DYNAMIC_LINKING_TABLE         6
-#define MULTIBOOT_ELF_SECTION_NOTE                          7
-#define MULTIBOOT_ELF_SECTION_UNINITIALIZED                 8
-#define MULTIBOOT_ELF_SECTION_REL_RELOCATION                9
-#define MULTIBOOT_ELF_SECTION_RESERVED                      10
-#define MULTIBOOT_ELF_SECTION_DYNAMIC_LOADER_SYMBOL_TABLE   11
-  uint32_t type;
-  uint64_t flags;
-  uint64_t address;
-  uint64_t file_offset;
-  uint64_t size;
-  uint32_t link;
-  uint32_t info;
-  uint64_t address_align;
-  uint64_t entry_size;
-}
-multiboot_elf_section_t;
 
 typedef struct
 {
