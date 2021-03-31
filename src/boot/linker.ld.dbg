@@ -28,9 +28,4 @@ SECTIONS {
         *(.bss .bss.*)
         . = ALIGN(4K);
     }
-
-    /DISCARD/ :
-    {
-        *(.comment)
-    }
 }
