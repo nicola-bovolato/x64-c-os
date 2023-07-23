@@ -1,6 +1,7 @@
 ASM = nasm
 LD = /usr/local/x86_64-elf-gcc/bin/x86_64-elf-ld
 CC = /usr/local/x86_64-elf-gcc/bin/x86_64-elf-gcc
+GDB = /usr/local/x86_64-elf-gcc/bin/x86_64-elf-gdb
 
 ASMFLAGS = -f elf64 -I src/boot
 LDFLAGS  = --nmagic # Disables automatic section alignment
@@ -10,7 +11,7 @@ ASM_SRC   := $(wildcard src/boot/*.asm)
 ASM_OBJ   := $(patsubst src/%.asm, build/%.o, $(ASM_SRC))
 C_HEADERS := $(wildcard src/kernel/*.h src/kernel/**/*.h)
 C_SRC	  := $(wildcard src/kernel/*.c src/kernel/**/*.c)
-C_OBJ     := $(patsubst src/%.c,   build/%.o, $(C_SRC))
+C_OBJ     := $(patsubst src/%.c, build/%.o, $(C_SRC))
 GRUB_CFG  := src/boot/grub.cfg
 LDFILE    := src/boot/linker.ld
 
@@ -18,7 +19,7 @@ SYMBOL 	  := kernel.elf
 KERNEL 	  := build/kernel.bin
 ISO 	  := kernel.iso
 
-.PHONY: iso run debug clean
+.PHONY: iso run debug gdb clean
 
 # Builds the kernel binary by linking required objects
 $(KERNEL): $(LDFILE) $(ASM_OBJ) $(C_OBJ)
@@ -47,7 +48,11 @@ run: $(ISO)
 debug: CCFLAGS += -g
 debug: LDFILE := $(LDFILE).dbg
 debug: $(ISO) $(SYMBOL)
-	qemu-system-x86_64 -cdrom $< -s
+	qemu-system-x86_64 -cdrom $< -s -S
+
+# Launches gdb
+gdb:
+	$(GDB) $(SYMBOL) -ex "target remote localhost:1234" -ex "continue"
 
 # Removes build files
 clean:

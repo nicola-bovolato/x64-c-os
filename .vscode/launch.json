@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "(gdb) Attach QEMU",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/local/x86_64-elf-gcc/bin/x86_64-elf-gdb",
+            "program": "${workspaceFolder}/build/kernel.bin",
+            "targetArchitecture": "x64",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {"text": "file ${workspaceFolder}/kernel.elf"},
+            ],
+            "customLaunchSetupCommands": [
+                {"text": "target remote localhost:1234"},
+            ]
+        }
+    ]
+}
