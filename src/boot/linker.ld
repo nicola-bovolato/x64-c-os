@@ -1,32 +1,35 @@
 ENTRY(start)
 
+KERNEL_ALIGN = 4K;
+KERNEL_START = 1M;
+
 SECTIONS {
-    . = 1M;
+    . = KERNEL_START;
 
     .boot :
     {
         /* ensure that the multiboot header is at the beginning of the binary */
         KEEP(*(.multiboot_header))
         *(.rodata .rodata.*)
-        . = ALIGN(4K);
+        . = ALIGN(KERNEL_ALIGN);
     }
 
     .text :
     {
         *(.text .text.*)
-        . = ALIGN(4K);
+        . = ALIGN(KERNEL_ALIGN);
     }
 
     .data :
     {
         *(.data .data.*)
-        . = ALIGN(4K);
+        . = ALIGN(KERNEL_ALIGN);
     }
 
     .bss :
     {
         *(.bss .bss.*)
-        . = ALIGN(4K);
+        . = ALIGN(KERNEL_ALIGN);
     }
 
     /DISCARD/ :
