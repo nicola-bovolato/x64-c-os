@@ -1,4 +1,2 @@
 build
-*.iso
-*.elf
 .vscode/settings.json
