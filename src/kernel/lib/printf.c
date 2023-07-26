@@ -1,8 +1,6 @@
 #include "printf.h"
-
 #include "../drivers/tty.h"
 #include "string.h"
-
 #include <stdarg.h>
 #include <stdint.h>
 

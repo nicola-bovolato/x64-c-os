@@ -1,7 +1,5 @@
 #include "string.h"
-
 #include "mem.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 

@@ -1,8 +1,6 @@
 #include "multiboot2.h"
-
-#include <stdbool.h>
-
 #include "../panic.h"
+#include <stdbool.h>
 
 typedef void* (*get_ptr_t)(multiboot_tag_t*);
 
@@ -95,5 +93,5 @@ static inline void* get_ptr_from_tag(uint32_t tag_type, get_ptr_t get_ptr) {
         tag = (multiboot_tag_t*)((uint8_t*)tag + ((tag->size + 7) & ~7));
     }
 
-    return (void*)-1;
+    panic("Multiboot tag not found!");
 }

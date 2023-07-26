@@ -1,6 +1,6 @@
-#include "memory.h"
-
+#include "frame.h"
 #include "../panic.h"
+#include <stdint.h>
 
 #define MAX_USED_REGIONS 10
 

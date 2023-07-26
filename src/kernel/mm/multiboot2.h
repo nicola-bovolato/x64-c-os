@@ -6,10 +6,9 @@
 #ifndef MULTIBOOT_H
 #define MULTIBOOT_H
 
+#include "memlayout.h"
 #include <stddef.h>
 #include <stdint.h>
-
-#include "memory.h"
 
 typedef struct {
     uint32_t name;

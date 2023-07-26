@@ -1,6 +1,6 @@
 #include "./drivers/tty.h"
 #include "./lib/printf.h"
-#include "./mm/memory.h"
+#include "./mm/frame.h"
 #include "./mm/multiboot2.h"
 #include "./mm/paging.h"
 #include "panic.h"

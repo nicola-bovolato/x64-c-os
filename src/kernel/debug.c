@@ -1,5 +1,4 @@
 #include "debug.h"
-
 #include "drivers/tty.h"
 
 void debug(char* message) {

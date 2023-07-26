@@ -1,8 +1,7 @@
 #include "paging.h"
-
 #include "../debug.h"
 #include "../panic.h"
-#include "memory.h"
+#include "frame.h"
 
 #define LOWER_HALF_TOP_ADDRESS     (0x0000800000000000 - 1)
 #define HIGHER_HALF_BOTTOM_ADDRESS 0xffff800000000000
