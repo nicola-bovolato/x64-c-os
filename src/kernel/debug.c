@@ -2,7 +2,7 @@
 
 #include "drivers/tty.h"
 
-void debug(char *message) {
+void debug(char* message) {
 
 #ifdef DEBUG
     set_color(VGA_WHITE, VGA_BLUE);
@@ -13,5 +13,4 @@ void debug(char *message) {
 #else
     (void)(message);
 #endif
-
 }

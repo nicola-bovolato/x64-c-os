@@ -1,8 +1,8 @@
 #include "./drivers/tty.h"
-#include "./mm/multiboot2.h"
-#include "./mm/memory.h"
-#include "./mm/paging.h"
 #include "./lib/printf.h"
+#include "./mm/memory.h"
+#include "./mm/multiboot2.h"
+#include "./mm/paging.h"
 #include "panic.h"
 
 #if defined(__linux__)
@@ -31,17 +31,25 @@ void kernel_main(uint32_t* multiboot_header) {
 
     printf("Page allocation test:\n");
 
-    uint64_t address = 42 * 512 * 512 * 4096L; //42th P3 entry
-    page_entry_t page = {.bits = 0};
-    page.fields.address =  address / FRAME_SIZE;
+    uint64_t     address = 42 * 512 * 512 * 4096L; // 42th P3 entry
+    page_entry_t page    = {.bits = 0};
+    page.fields.address  = address / FRAME_SIZE;
+
 
     void* frame = allocate_frame();
 
     printf("Frame addr: %p\n", frame);
-    printf("Initial pointed page addr (should be (*void) -1): %p\n", get_physical_address((void*)address));
+    printf(
+        "Initial pointed page addr (should be (*void) -1): %p\n",
+        get_physical_address((void*)address)
+    );
 
     map_page_to_frame(page, frame);
-    printf("After mapping: %p == %p (frame) \n", get_physical_address((void*)address), frame);
+    printf(
+        "After mapping: %p == %p (frame) \n",
+        get_physical_address((void*)address),
+        frame
+    );
 
     printf("Contents of the page (random): %p \n", *((size_t*)page.bits));
 
@@ -49,5 +57,5 @@ void kernel_main(uint32_t* multiboot_header) {
     printf("After unmapping: %p\n", get_physical_address((void*)address));
 
     // Reading after unmapping will cause a page fault
-    //printf("Contents of the page: %p \n", *((size_t*)page.bits));
+    // printf("Contents of the page: %p \n", *((size_t*)page.bits));
 }

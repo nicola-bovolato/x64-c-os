@@ -1,11 +1,12 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #define FRAME_SIZE 0x1000
-#define FRAME_MASK (~((size_t)FRAME_SIZE - 1)) // if FRAME_SIZE = 0x1000, FRAME_MASK = 0xFFFFFFFFFFFFF000
+// if FRAME_SIZE = 0x1000, FRAME_MASK = 0xFFFFFFFFFFFFF000
+#define FRAME_MASK (~((size_t)FRAME_SIZE - 1))
 
 typedef struct {
     uint8_t* start;
