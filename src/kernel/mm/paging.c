@@ -1,6 +1,5 @@
 #include "paging.h"
-#include "../debug.h"
-#include "../panic.h"
+#include "../log.h"
 #include "frame.h"
 
 #define LOWER_HALF_TOP_ADDRESS     (0x0000800000000000 - 1)
@@ -26,7 +25,7 @@ void* get_physical_address(void* virtual) {
     if ((size_t) virtual > LOWER_HALF_TOP_ADDRESS
         && (size_t) virtual < HIGHER_HALF_BOTTOM_ADDRESS) {
         // Invalid address
-        panic("Virtual address not in allowed memory");
+        PANIC("Virtual address not in allowed memory");
     }
 
     size_t offset = (size_t) virtual % FRAME_SIZE;
@@ -36,25 +35,25 @@ void* get_physical_address(void* virtual) {
 
     page_table_t* table3_ptr = next_table(table4_ptr, get_table4_index(page));
     if (table3_ptr == (void*)-1) {
-        debug("(get_physical_address) Page table 3 is empty");
+        DEBUG("(get_physical_address) Page table 3 is empty\n");
         return (void*)-1;
     }
 
     page_table_t* table2_ptr = next_table(table3_ptr, get_table3_index(page));
     if (table2_ptr == (void*)-1) {
-        debug("(get_physical_address) Page table 2 is empty");
+        DEBUG("(get_physical_address) Page table 2 is empty\n");
         return (void*)-1;
     }
 
     page_table_t* table1_ptr = next_table(table2_ptr, get_table2_index(page));
     if (table1_ptr == (void*)-1) {
-        debug("(get_physical_address) Page table 1 is empty");
+        DEBUG("(get_physical_address) Page table 1 is empty\n");
         return (void*)-1;
     }
 
     page_entry_t table1_entry = table1_ptr->entries[get_table1_index(page)];
     if (!table1_entry.fields.present) {
-        debug("(get_physical_address) Page table 1 entry is empty");
+        DEBUG("(get_physical_address) Page table 1 entry is empty\n");
         return (void*)-1;
     }
 
@@ -70,31 +69,34 @@ void map_page_to_frame(page_entry_t page, uint8_t* frame_ptr) {
     page_table_t* table1_ptr
         = get_or_create_next_table(table2_ptr, get_table2_index(page));
 
-    size_t table1_index = get_table1_index(page);
+    page_entry_t* table1_entry = &(table1_ptr->entries[get_table1_index(page)]);
 
-    if (table1_ptr->entries[table1_index].bits != 0)
-        panic("Page is already in use");
-    table1_ptr->entries[table1_index].fields.present = true;
-    table1_ptr->entries[table1_index].fields.address
-        = (size_t)frame_ptr / FRAME_SIZE;
+    if (table1_entry->bits != 0)
+        PANIC(
+            "Page %x is already in use (points to %x)",
+            page.bits,
+            table1_entry->bits
+        );
+    table1_entry->fields.present = true;
+    table1_entry->fields.address = (size_t)frame_ptr / FRAME_SIZE;
 }
 
 void unmap_page(page_entry_t page) {
     page_table_t* table3_ptr = next_table(table4_ptr, get_table4_index(page));
     if (table3_ptr == (void*)-1) {
-        debug("(unmap_page) Page table 3 is empty");
+        DEBUG("(unmap_page) Page table 3 is empty\n");
         return;
     }
 
     page_table_t* table2_ptr = next_table(table3_ptr, get_table3_index(page));
     if (table2_ptr == (void*)-1) {
-        debug("(unmap_page) Page table 2 is empty");
+        DEBUG("(unmap_page) Page table 2 is empty\n");
         return;
     }
 
     page_table_t* table1_ptr = next_table(table2_ptr, get_table2_index(page));
     if (table1_ptr == (void*)-1) {
-        debug("(unmap_page) Page table 1 is empty");
+        DEBUG("(unmap_page) Page table 1 is empty\n");
         return;
     }
 
@@ -135,11 +137,15 @@ static inline void flush_tlb_page(page_entry_t page) {
 }
 
 static inline page_table_t* next_table(page_table_t* table, size_t index) {
-    page_entry_t entry = table->entries[index];
-    if (!entry.fields.present) {
+    page_entry_t* entry = &(table->entries[index]);
+    if (!entry->fields.present) {
         return (void*)-1;
     }
-    if (entry.fields.huge_page) panic("Huge pages not supported!");
+    if (entry->fields.huge_page)
+        PANIC(
+            "Huge pages not supported! (Table entry %d is a huge page)",
+            entry->bits
+        );
     return (page_table_t*)(((size_t)table << 9) | (index << 12));
 }
 
@@ -148,8 +154,6 @@ get_or_create_next_table(page_table_t* table, size_t index) {
 
     // if the next table does not exist, allocate a frame for a new one
     if (next_table(table, index) == (void*)-1) {
-        if (table->entries[index].fields.huge_page)
-            panic("Huge pages not supported");
 
         table->entries[index].fields.address
             = (size_t)allocate_frame() / FRAME_SIZE;

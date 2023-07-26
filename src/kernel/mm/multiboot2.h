@@ -10,38 +10,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef struct {
-    uint32_t name;
-#define MULTIBOOT_ELF_SECTION_UNUSED                      0
-#define MULTIBOOT_ELF_SECTION_PROGRAM_SECTION             1
-#define MULTIBOOT_ELF_SECTION_LINKER_SYMBOL_TABLE         2
-#define MULTIBOOT_ELF_SECTION_STRING_TABLE                3
-#define MULTIBOOT_ELF_SECTION_RELA_RELOCATION             4
-#define MULTIBOOT_ELF_SECTION_SYMBOL_HASH_TABLE           5
-#define MULTIBOOT_ELF_SECTION_DYNAMIC_LINKING_TABLE       6
-#define MULTIBOOT_ELF_SECTION_NOTE                        7
-#define MULTIBOOT_ELF_SECTION_UNINITIALIZED               8
-#define MULTIBOOT_ELF_SECTION_REL_RELOCATION              9
-#define MULTIBOOT_ELF_SECTION_RESERVED                    10
-#define MULTIBOOT_ELF_SECTION_DYNAMIC_LOADER_SYMBOL_TABLE 11
-    uint32_t type;
-    uint64_t flags;
-    uint64_t address;
-    uint64_t file_offset;
-    uint64_t size;
-    uint32_t link;
-    uint32_t info;
-    uint64_t address_align;
-    uint64_t entry_size;
-} multiboot_elf_section_t;
+void init_multiboot_info(uint32_t* address);
 
-void      init_multiboot_info(uint32_t* address);
-uint32_t* get_multiboot_info_ptr();
+size_t get_used_mem_regions_number();
+void   get_used_mem_regions(mem_region_t* regions);
 
-size_t                   get_elf_sections_number();
-multiboot_elf_section_t* get_elf_sections();
-
-mem_region_t get_mem_region();
+mem_region_t get_system_mem_region();
 mem_region_t get_kernel_mem_region();
 mem_region_t get_multiboot_mem_region();
 
@@ -74,16 +48,41 @@ mem_region_t get_multiboot_mem_region();
 // Multiboot Structures
 
 typedef struct {
-    uint64_t addr;
-    uint64_t len;
+    uint64_t base_addr;
+    uint64_t length;
 #define MULTIBOOT_MEMORY_AVAILABLE        1
 #define MULTIBOOT_MEMORY_RESERVED         2
 #define MULTIBOOT_MEMORY_ACPI_RECLAIMABLE 3
 #define MULTIBOOT_MEMORY_NVS              4
 #define MULTIBOOT_MEMORY_BADRAM           5
     uint32_t type;
-    uint32_t zero;
+    uint32_t _; // reserved
 } multiboot_mmap_entry_t;
+
+typedef struct {
+    uint32_t name;
+#define MULTIBOOT_ELF_SECTION_UNUSED                      0
+#define MULTIBOOT_ELF_SECTION_PROGRAM_SECTION             1
+#define MULTIBOOT_ELF_SECTION_LINKER_SYMBOL_TABLE         2
+#define MULTIBOOT_ELF_SECTION_STRING_TABLE                3
+#define MULTIBOOT_ELF_SECTION_RELA_RELOCATION             4
+#define MULTIBOOT_ELF_SECTION_SYMBOL_HASH_TABLE           5
+#define MULTIBOOT_ELF_SECTION_DYNAMIC_LINKING_TABLE       6
+#define MULTIBOOT_ELF_SECTION_NOTE                        7
+#define MULTIBOOT_ELF_SECTION_UNINITIALIZED               8
+#define MULTIBOOT_ELF_SECTION_REL_RELOCATION              9
+#define MULTIBOOT_ELF_SECTION_RESERVED                    10
+#define MULTIBOOT_ELF_SECTION_DYNAMIC_LOADER_SYMBOL_TABLE 11
+    uint32_t type;
+    uint64_t flags;
+    uint64_t address;
+    uint64_t file_offset;
+    uint64_t size;
+    uint32_t link;
+    uint32_t info;
+    uint64_t address_align;
+    uint64_t entry_size;
+} multiboot_elf_section_t;
 
 typedef struct {
     uint32_t type;
@@ -106,20 +105,20 @@ typedef struct {
 } multiboot_tag_bootdev_t;
 
 typedef struct {
-    uint32_t type;
-    uint32_t size;
-    uint32_t entry_size;
-    uint32_t entry_version;
-    uint8_t  entries[];
+    uint32_t               type;
+    uint32_t               size;
+    uint32_t               entry_size;
+    uint32_t               entry_version;
+    multiboot_mmap_entry_t entries[];
 } multiboot_tag_mmap_t;
 
 typedef struct {
-    uint32_t type;
-    uint32_t size;
-    uint32_t num;
-    uint32_t entsize;
-    uint32_t shndx;
-    uint8_t  sections[];
+    uint32_t                type;
+    uint32_t                size;
+    uint32_t                num;
+    uint32_t                entsize;
+    uint32_t                shndx;
+    multiboot_elf_section_t sections[];
 } multiboot_tag_elf_sections_t;
 
 #endif

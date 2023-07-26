@@ -1,53 +1,57 @@
 #include "multiboot2.h"
-#include "../panic.h"
+#include "../log.h"
 #include <stdbool.h>
-
-typedef void* (*get_ptr_t)(multiboot_tag_t*);
 
 static uint32_t* multiboot_info_ptr = (uint32_t*)-1;
 
-static inline void* get_meminfo_end_ptr(multiboot_tag_t* tag);
-static inline void* get_elf_sections_ptr(multiboot_tag_t* tag);
-static inline void* get_elf_sections_number_as_ptr(multiboot_tag_t* tag);
-static inline void* get_ptr_from_tag(uint32_t tag_type, get_ptr_t get_ptr);
+static inline multiboot_tag_t*              get_tag(uint32_t tag_type);
+static inline multiboot_tag_elf_sections_t* get_elf_sections();
 
 void init_multiboot_info(uint32_t* address) {
     if ((((uint64_t)address) & 7) != 0)
-        panic("Multiboot address is not aligned");
-    if (address == (uint32_t*)-1) panic("Multiboot address is not initialized");
+        PANIC("Multiboot address is not aligned (%d)", address);
+    if (address == (uint32_t*)-1) PANIC("Multiboot address is not initialized");
 
     multiboot_info_ptr = address;
 }
 
-uint32_t* get_multiboot_info_ptr() { return multiboot_info_ptr; }
-
-mem_region_t get_mem_region() {
-    uint8_t* mem_end = get_ptr_from_tag(
-        MULTIBOOT_TAG_TYPE_BASIC_MEMINFO, get_meminfo_end_ptr
-    );
-    return (mem_region_t){0, mem_end};
+size_t get_used_mem_regions_number() {
+    multiboot_tag_mmap_t* memmap
+        = (multiboot_tag_mmap_t*)get_tag(MULTIBOOT_TAG_TYPE_MMAP);
+    return ((size_t)memmap->size - (sizeof memmap))
+         / (size_t)memmap->entry_size;
 }
+
+void get_used_mem_regions(mem_region_t* used_regions) {
+    multiboot_tag_mmap_t* memmap
+        = (multiboot_tag_mmap_t*)get_tag(MULTIBOOT_TAG_TYPE_MMAP);
+
+    for (size_t i = 0; i < get_used_mem_regions_number(); i++) {
+        multiboot_mmap_entry_t* entry = &memmap->entries[i];
+        used_regions[i].start         = (uint8_t*)entry->base_addr;
+        used_regions[i].end = (uint8_t*)(entry->base_addr + entry->length);
+    }
+}
+
+mem_region_t get_system_mem_region() {
+    multiboot_tag_basic_meminfo_t* meminfo = (multiboot_tag_basic_meminfo_t*)
+        get_tag(MULTIBOOT_TAG_TYPE_BASIC_MEMINFO);
+    mem_region_t mem_region
+        = {.start = 0x0, .end = (uint8_t*)(meminfo->mem_upper * 1024)};
+    return mem_region;
+}
+
 mem_region_t get_multiboot_mem_region() {
     return (mem_region_t
-    ){(uint8_t*)multiboot_info_ptr,
-      (uint8_t*)multiboot_info_ptr + *(multiboot_info_ptr)};
-}
-
-size_t get_elf_sections_number() {
-    return (size_t)get_ptr_from_tag(
-        MULTIBOOT_TAG_TYPE_ELF_SECTIONS, get_elf_sections_number_as_ptr
-    );
-}
-
-multiboot_elf_section_t* get_elf_sections() {
-    return (multiboot_elf_section_t*)get_ptr_from_tag(
-        MULTIBOOT_TAG_TYPE_ELF_SECTIONS, get_elf_sections_ptr
-    );
+    ){.start = (uint8_t*)multiboot_info_ptr,
+      .end   = (uint8_t*)multiboot_info_ptr + *(multiboot_info_ptr)};
 }
 
 mem_region_t get_kernel_mem_region() {
-    multiboot_elf_section_t* section   = get_elf_sections();
-    int                      remaining = get_elf_sections_number();
+
+    multiboot_tag_elf_sections_t* sections_tag = get_elf_sections();
+    int                           remaining    = sections_tag->num;
+    multiboot_elf_section_t*      section      = sections_tag->sections;
 
     uint8_t* min = (uint8_t*)-1;
     uint8_t* max = 0;
@@ -66,32 +70,24 @@ mem_region_t get_kernel_mem_region() {
     return (mem_region_t){min, max};
 }
 
-static inline void* get_elf_sections_number_as_ptr(multiboot_tag_t* tag) {
-    return (void*)(size_t)((multiboot_tag_elf_sections_t*)tag)->num;
-}
-
-static inline void* get_elf_sections_ptr(multiboot_tag_t* tag) {
-    return (void*)((multiboot_tag_elf_sections_t*)tag)->sections;
-}
-
-static inline void* get_meminfo_end_ptr(multiboot_tag_t* tag) {
-
-    multiboot_tag_basic_meminfo_t* mem = (multiboot_tag_basic_meminfo_t*)tag;
-
-    return (void*)((size_t)mem->mem_upper * 1024);
+static inline multiboot_tag_elf_sections_t* get_elf_sections() {
+    return (multiboot_tag_elf_sections_t*)get_tag(
+        MULTIBOOT_TAG_TYPE_ELF_SECTIONS
+    );
 }
 
 // To avoid repeating code this function iterates through tags, and returns the
-// get_ptr_t function value on a specific tag
-static inline void* get_ptr_from_tag(uint32_t tag_type, get_ptr_t get_ptr) {
+// first tag of the specified type
+static inline multiboot_tag_t* get_tag(uint32_t tag_type) {
 
     // skips the first 8 bytes of the header: (total_size and reserved)
     multiboot_tag_t* tag = (multiboot_tag_t*)(multiboot_info_ptr + 2);
 
     while (tag->type != MULTIBOOT_TAG_TYPE_END) {
-        if (tag->type == tag_type) return get_ptr(tag);
+        if (tag->type == tag_type) return tag;
         tag = (multiboot_tag_t*)((uint8_t*)tag + ((tag->size + 7) & ~7));
     }
 
-    panic("Multiboot tag not found!");
+    PANIC("Multiboot tag (%d) not found!", tag_type);
+    return (void*)-1;
 }
