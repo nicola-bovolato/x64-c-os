@@ -16,7 +16,6 @@ void* memcpy(const void* source, void* destination, size_t length) {
 
     return destination;
 }
-isnd;
 
 void* memmove(const void* source, void* destination, size_t length) {
     uint8_t*       dest = (uint8_t*)destination;
