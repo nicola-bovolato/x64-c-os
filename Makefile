@@ -40,7 +40,7 @@ run: --iso
 # Runs qemu and enables debugging
 debug: TARGET := debug
 debug: CCFLAGS += -g -DDEBUG
-debug: --iso
+debug: --iso --symbol
 	$(info $(ASM_OBJ))
 	qemu-system-x86_64 -cdrom $(ISO) -s -S
 
