@@ -42,7 +42,7 @@ debug: TARGET := debug
 debug: CCFLAGS += -g -DDEBUG
 debug: --iso --symbol
 	$(info $(ASM_OBJ))
-	qemu-system-x86_64 -cdrom $(ISO) -s -S
+	qemu-system-x86_64 -cdrom $(ISO) -s
 
 # Attaches gcb to qemu
 gdb: TARGET := debug

@@ -7,6 +7,8 @@ static uint32_t* multiboot_info_ptr = (uint32_t*)-1;
 static inline multiboot_tag_t*              get_tag(uint32_t tag_type);
 static inline multiboot_tag_elf_sections_t* get_elf_sections();
 
+static inline size_t get_mem_regions_number(multiboot_tag_mmap_t* memmap);
+
 void init_multiboot_info(uint32_t* address) {
     if ((((uint64_t)address) & 7) != 0)
         PANIC("Multiboot address is not aligned (%d)", address);
@@ -15,36 +17,60 @@ void init_multiboot_info(uint32_t* address) {
     multiboot_info_ptr = address;
 }
 
-size_t get_used_mem_regions_number() {
+size_t get_used_mem_regions(mem_region_t* used_regions) {
     multiboot_tag_mmap_t* memmap
         = (multiboot_tag_mmap_t*)get_tag(MULTIBOOT_TAG_TYPE_MMAP);
-    return ((size_t)memmap->size - (sizeof memmap))
-         / (size_t)memmap->entry_size;
-}
+    size_t used_regions_number = 0;
 
-void get_used_mem_regions(mem_region_t* used_regions) {
-    multiboot_tag_mmap_t* memmap
-        = (multiboot_tag_mmap_t*)get_tag(MULTIBOOT_TAG_TYPE_MMAP);
-
-    for (size_t i = 0; i < get_used_mem_regions_number(); i++) {
+    for (size_t i = 0; i < get_mem_regions_number(memmap); i++) {
         multiboot_mmap_entry_t* entry = &memmap->entries[i];
-        used_regions[i].start         = (uint8_t*)entry->base_addr;
-        used_regions[i].end = (uint8_t*)(entry->base_addr + entry->length);
+
+        if (entry->type != MULTIBOOT_MEMORY_AVAILABLE) {
+            used_regions[used_regions_number].start
+                = (uint8_t*)entry->base_addr;
+            used_regions[used_regions_number].end
+                = (uint8_t*)(entry->base_addr + entry->length - 1);
+            used_regions_number++;
+        }
     }
+
+    return used_regions_number;
 }
+
 
 mem_region_t get_system_mem_region() {
-    multiboot_tag_basic_meminfo_t* meminfo = (multiboot_tag_basic_meminfo_t*)
-        get_tag(MULTIBOOT_TAG_TYPE_BASIC_MEMINFO);
-    mem_region_t mem_region
-        = {.start = 0x0, .end = (uint8_t*)(meminfo->mem_upper * 1024)};
-    return mem_region;
+    multiboot_tag_mmap_t* memmap
+        = (multiboot_tag_mmap_t*)get_tag(MULTIBOOT_TAG_TYPE_MMAP);
+
+    // iterate through memory map
+    // mem_entry_t end = highest base_addr + length - 1
+    uint8_t* highest_address = 0;
+
+    DEBUG("Multiboot memory map:\n");
+    for (size_t i = 0; i < get_mem_regions_number(memmap); i++) {
+        multiboot_mmap_entry_t* entry = &memmap->entries[i];
+        DEBUG(
+            "\t%d: start = %p, length = %p, type = %p\n",
+            i,
+            entry->base_addr,
+            entry->length,
+            entry->type
+        );
+
+        uint8_t* end_region_addr
+            = (uint8_t*)(entry->base_addr + entry->length - 1);
+        if (end_region_addr > highest_address)
+            highest_address = end_region_addr;
+    }
+
+    DEBUG("Total system memory: start = 0x0, end = %p\n", highest_address);
+    return (mem_region_t){.start = 0x0, .end = highest_address};
 }
 
 mem_region_t get_multiboot_mem_region() {
     return (mem_region_t
     ){.start = (uint8_t*)multiboot_info_ptr,
-      .end   = (uint8_t*)multiboot_info_ptr + *(multiboot_info_ptr)};
+      .end   = (uint8_t*)multiboot_info_ptr + (*multiboot_info_ptr) - 1};
 }
 
 mem_region_t get_kernel_mem_region() {
@@ -61,13 +87,18 @@ mem_region_t get_kernel_mem_region() {
             if (min > (uint8_t*)section->address)
                 min = (uint8_t*)section->address;
             if (max < (uint8_t*)section->address)
-                max = (uint8_t*)(section->address + section->size);
+                max = (uint8_t*)(section->address + section->size - 1);
         }
         remaining--;
         section++;
     }
 
-    return (mem_region_t){min, max};
+    return (mem_region_t){.start = min, .end = max};
+}
+
+static inline size_t get_mem_regions_number(multiboot_tag_mmap_t* memmap) {
+    return ((size_t)memmap->size - (sizeof memmap))
+         / (size_t)memmap->entry_size;
 }
 
 static inline multiboot_tag_elf_sections_t* get_elf_sections() {

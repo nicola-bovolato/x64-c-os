@@ -12,8 +12,7 @@
 
 void init_multiboot_info(uint32_t* address);
 
-size_t get_used_mem_regions_number();
-void   get_used_mem_regions(mem_region_t* regions);
+size_t get_used_mem_regions(mem_region_t* regions);
 
 mem_region_t get_system_mem_region();
 mem_region_t get_kernel_mem_region();

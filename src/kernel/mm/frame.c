@@ -16,15 +16,13 @@ void init_frame_allocator() {
     next_free_frame            = system_memory.start;
     end_of_memory              = system_memory.end;
 
-    used_regions_size = get_used_mem_regions_number();
+    size_t used_regions_size = get_used_mem_regions(used_regions);
     if (used_regions_size > MAX_USED_REGIONS)
         PANIC(
             "Used memory regions (%d) exceed maximum allowed (%d)",
             used_regions_size,
             MAX_USED_REGIONS
         );
-
-    get_used_mem_regions(used_regions);
 }
 
 void* allocate_frame() {
