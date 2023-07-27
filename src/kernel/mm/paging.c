@@ -17,8 +17,7 @@ static inline void zero_table_entries(page_table_t* table);
 static inline void flush_tlb_page(page_entry_t page);
 
 static inline page_table_t* next_table(page_table_t* table, size_t index);
-static inline page_table_t*
-get_or_create_next_table(page_table_t* table, size_t index);
+static inline page_table_t* get_or_create_next_table(page_table_t* table, size_t index);
 
 void* get_physical_address(void* virtual) {
 
@@ -62,21 +61,14 @@ void* get_physical_address(void* virtual) {
 
 void map_page_to_frame(page_entry_t page, uint8_t* frame_ptr) {
 
-    page_table_t* table3_ptr
-        = get_or_create_next_table(table4_ptr, get_table4_index(page));
-    page_table_t* table2_ptr
-        = get_or_create_next_table(table3_ptr, get_table3_index(page));
-    page_table_t* table1_ptr
-        = get_or_create_next_table(table2_ptr, get_table2_index(page));
+    page_table_t* table3_ptr = get_or_create_next_table(table4_ptr, get_table4_index(page));
+    page_table_t* table2_ptr = get_or_create_next_table(table3_ptr, get_table3_index(page));
+    page_table_t* table1_ptr = get_or_create_next_table(table2_ptr, get_table2_index(page));
 
     page_entry_t* table1_entry = &(table1_ptr->entries[get_table1_index(page)]);
 
     if (table1_entry->bits != 0)
-        PANIC(
-            "Page %x is already in use (points to %x)",
-            page.bits,
-            table1_entry->bits
-        );
+        PANIC("Page %x is already in use (points to %x)", page.bits, table1_entry->bits);
     table1_entry->fields.present = true;
     table1_entry->fields.address = (size_t)frame_ptr / FRAME_SIZE;
 }
@@ -103,8 +95,7 @@ void unmap_page(page_entry_t page) {
     int table1_index = get_table1_index(page);
 
     void* frame_ptr
-        = (void*)((size_t)table1_ptr->entries[table1_index].fields.address
-                  * FRAME_SIZE);
+        = (void*)((size_t)table1_ptr->entries[table1_index].fields.address * FRAME_SIZE);
 
     table1_ptr->entries[table1_index].bits = 0;
     flush_tlb_page(page);
@@ -142,21 +133,16 @@ static inline page_table_t* next_table(page_table_t* table, size_t index) {
         return (void*)-1;
     }
     if (entry->fields.huge_page)
-        PANIC(
-            "Huge pages not supported! (Table entry %d is a huge page)",
-            entry->bits
-        );
+        PANIC("Huge pages not supported! (Table entry %d is a huge page)", entry->bits);
     return (page_table_t*)(((size_t)table << 9) | (index << 12));
 }
 
-static inline page_table_t*
-get_or_create_next_table(page_table_t* table, size_t index) {
+static inline page_table_t* get_or_create_next_table(page_table_t* table, size_t index) {
 
     // if the next table does not exist, allocate a frame for a new one
     if (next_table(table, index) == (void*)-1) {
 
-        table->entries[index].fields.address
-            = (size_t)allocate_frame() / FRAME_SIZE;
+        table->entries[index].fields.address  = (size_t)allocate_frame() / FRAME_SIZE;
         table->entries[index].fields.present  = true;
         table->entries[index].fields.writable = true;
         zero_table_entries(next_table(table, index));

@@ -3,6 +3,7 @@ BasedOnStyle: LLVM
 
 IndentWidth: 4
 IndentStyle: space
+ColumnLimit: 100
 
 PointerAlignment: Left
 ReferenceAlignment: Left

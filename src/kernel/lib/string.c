@@ -12,7 +12,8 @@ int strlen(const char* str) {
     return length;
 }
 
-// compares string returns 0 if equal
+// compares strings
+// returns 0 if equal
 int strcmp(const char* str_1, const char* str_2) {
 
     while (*str_1 != '\0' && *str_1 == *str_2) {
@@ -35,10 +36,9 @@ void strrev(char* str) {
 }
 
 // unsigned int to ascii string
-void utoa(unsigned int number, char* dest, unsigned int base) {
-    ultoa(number, dest, base);
-}
+void utoa(unsigned int number, char* dest, unsigned int base) { ultoa(number, dest, base); }
 
+// unsigned long to ascii string
 void ultoa(unsigned long number, char* dest, unsigned int base) {
 
     int i = 0;
@@ -61,10 +61,9 @@ void ultoa(unsigned long number, char* dest, unsigned int base) {
 }
 
 // int to ascii string
-void itoa(int number, char* dest, unsigned int base) {
-    ltoa(number, dest, base);
-}
+void itoa(int number, char* dest, unsigned int base) { ltoa(number, dest, base); }
 
+// long to ascii string
 void ltoa(long number, char* dest, unsigned int base) {
     int  i   = 0;
     bool neg = number < 0;

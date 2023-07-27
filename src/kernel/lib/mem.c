@@ -24,8 +24,7 @@ void* memmove(const void* source, void* destination, size_t length) {
     // memmove checks if source and destination buffers overlap
     // if the buffers don't overlap the direction it copies from doesn't matter
 
-    // if the source buffer starts before the destination's start copying from
-    // the end
+    // if the source buffer starts before the destination's start copying from the end
     if (src < dest) {
         for (int i = length - 1; i >= 0; i--) dest[i] = src[i];
     }

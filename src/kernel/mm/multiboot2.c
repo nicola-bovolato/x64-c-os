@@ -4,30 +4,29 @@
 
 static uint32_t* multiboot_info_ptr = (uint32_t*)-1;
 
-static inline multiboot_tag_t*              get_tag(uint32_t tag_type);
-static inline multiboot_tag_elf_sections_t* get_elf_sections();
+static inline multiboot_tag_t* get_tag(uint32_t tag_type);
 
 static inline size_t get_mem_regions_number(multiboot_tag_mmap_t* memmap);
 
+// required to use all of the folowing functions
 void init_multiboot_info(uint32_t* address) {
-    if ((((uint64_t)address) & 7) != 0)
-        PANIC("Multiboot address is not aligned (%d)", address);
+    if ((((uint64_t)address) & 7) != 0) PANIC("Multiboot address is not aligned (%d)", address);
     if (address == (uint32_t*)-1) PANIC("Multiboot address is not initialized");
 
     multiboot_info_ptr = address;
 }
 
+// Copies all used memory regions into the first parameter
+// Ensure that when using it the array is big enough
 size_t get_used_mem_regions(mem_region_t* used_regions) {
-    multiboot_tag_mmap_t* memmap
-        = (multiboot_tag_mmap_t*)get_tag(MULTIBOOT_TAG_TYPE_MMAP);
-    size_t used_regions_number = 0;
+    multiboot_tag_mmap_t* memmap = (multiboot_tag_mmap_t*)get_tag(MULTIBOOT_TAG_TYPE_MMAP);
+    size_t                used_regions_number = 0;
 
     for (size_t i = 0; i < get_mem_regions_number(memmap); i++) {
         multiboot_mmap_entry_t* entry = &memmap->entries[i];
 
         if (entry->type != MULTIBOOT_MEMORY_AVAILABLE) {
-            used_regions[used_regions_number].start
-                = (uint8_t*)entry->base_addr;
+            used_regions[used_regions_number].start = (uint8_t*)entry->base_addr;
             used_regions[used_regions_number].end
                 = (uint8_t*)(entry->base_addr + entry->length - 1);
             used_regions_number++;
@@ -37,10 +36,9 @@ size_t get_used_mem_regions(mem_region_t* used_regions) {
     return used_regions_number;
 }
 
-
+// Returns the availlable system memory
 mem_region_t get_system_mem_region() {
-    multiboot_tag_mmap_t* memmap
-        = (multiboot_tag_mmap_t*)get_tag(MULTIBOOT_TAG_TYPE_MMAP);
+    multiboot_tag_mmap_t* memmap = (multiboot_tag_mmap_t*)get_tag(MULTIBOOT_TAG_TYPE_MMAP);
 
     // iterate through memory map
     // mem_entry_t end = highest base_addr + length - 1
@@ -57,35 +55,35 @@ mem_region_t get_system_mem_region() {
             entry->type
         );
 
-        uint8_t* end_region_addr
-            = (uint8_t*)(entry->base_addr + entry->length - 1);
-        if (end_region_addr > highest_address)
-            highest_address = end_region_addr;
+        uint8_t* end_region_addr = (uint8_t*)(entry->base_addr + entry->length - 1);
+        if (end_region_addr > highest_address) highest_address = end_region_addr;
     }
 
     DEBUG("Total system memory: start = 0x0, end = %p\n", highest_address);
     return (mem_region_t){.start = 0x0, .end = highest_address};
 }
 
+// Returns the memory region used by the multiboot struct
 mem_region_t get_multiboot_mem_region() {
     return (mem_region_t
     ){.start = (uint8_t*)multiboot_info_ptr,
       .end   = (uint8_t*)multiboot_info_ptr + (*multiboot_info_ptr) - 1};
 }
 
+// Returns the memory region used by the kernel
 mem_region_t get_kernel_mem_region() {
 
-    multiboot_tag_elf_sections_t* sections_tag = get_elf_sections();
-    int                           remaining    = sections_tag->num;
-    multiboot_elf_section_t*      section      = sections_tag->sections;
+    multiboot_tag_elf_sections_t* sections_tag
+        = (multiboot_tag_elf_sections_t*)get_tag(MULTIBOOT_TAG_TYPE_ELF_SECTIONS);
+    int                      remaining = sections_tag->num;
+    multiboot_elf_section_t* section   = sections_tag->sections;
 
     uint8_t* min = (uint8_t*)-1;
     uint8_t* max = 0;
 
     while (remaining > 0) {
         if (section->type != MULTIBOOT_ELF_SECTION_UNUSED) {
-            if (min > (uint8_t*)section->address)
-                min = (uint8_t*)section->address;
+            if (min > (uint8_t*)section->address) min = (uint8_t*)section->address;
             if (max < (uint8_t*)section->address)
                 max = (uint8_t*)(section->address + section->size - 1);
         }
@@ -96,19 +94,13 @@ mem_region_t get_kernel_mem_region() {
     return (mem_region_t){.start = min, .end = max};
 }
 
+// Returns the number of memory regions
 static inline size_t get_mem_regions_number(multiboot_tag_mmap_t* memmap) {
-    return ((size_t)memmap->size - (sizeof memmap))
-         / (size_t)memmap->entry_size;
+    return ((size_t)memmap->size - (sizeof memmap)) / (size_t)memmap->entry_size;
 }
 
-static inline multiboot_tag_elf_sections_t* get_elf_sections() {
-    return (multiboot_tag_elf_sections_t*)get_tag(
-        MULTIBOOT_TAG_TYPE_ELF_SECTIONS
-    );
-}
-
-// To avoid repeating code this function iterates through tags, and returns the
-// first tag of the specified type
+// To avoid repeating code this function iterates through tags
+// and returns the first tag of the specified type
 static inline multiboot_tag_t* get_tag(uint32_t tag_type) {
 
     // skips the first 8 bytes of the header: (total_size and reserved)
