@@ -22,22 +22,22 @@ void kernel_main(uint32_t* multiboot_header) {
     set_color(VGA_WHITE, VGA_BLACK);
 
 
-    init_multiboot_info(multiboot_header);
-    init_frame_allocator();
+    // init_multiboot_info(multiboot_header);
+    // init_frame_allocator();
+    init_paging(multiboot_header);
 
-    printf("Frame allocator test:\n");
-    int i = 0;
-    while (true) {
-        printf("(%d)Allocated: %x\n", i, allocate_frame());
-        i++;
-    }
+    // printf("Frame allocator test:\n");
+    // int i = 0;
+    // while (true) {
+    //     printf("(%d)Allocated: %p\n", i, allocate_frame());
+    //     i++;
+    // }
 
     // printf("Page allocation test:\n");
 
     // uint64_t     address = 42 * 512 * 512 * 4096L; // 42th P3 entry
     // page_entry_t page    = {.bits = 0};
     // page.fields.address  = address / FRAME_SIZE;
-
 
     // void* frame = allocate_frame();
 
@@ -48,11 +48,7 @@ void kernel_main(uint32_t* multiboot_header) {
     // );
 
     // map_page_to_frame(page, frame);
-    // printf(
-    //     "After mapping: %p == %p (frame) \n",
-    //     get_physical_address((void*)address),
-    //     frame
-    // );
+    // printf("After mapping: %p == %p (frame) \n", get_physical_address((void*)address), frame);
 
     // printf("Contents of the page (random): %p \n", *((uint64_t*)page.bits));
 

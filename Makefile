@@ -14,7 +14,7 @@ OUTDIR     = build/$(TARGET)
 
 ASM_SRC    = $(wildcard $(SRCDIR)/boot/*.asm)
 ASM_OBJ    = $(patsubst $(SRCDIR)/%.asm, $(OUTDIR)/%.o, $(ASM_SRC))
-C_HEADERS  = $(wildcard $(SRCDIR)/kernel/*.h $(SRCDIR)kernel/**/*.h)
+C_HEADERS  = $(wildcard $(SRCDIR)/kernel/*.h $(SRCDIR)/kernel/**/*.h)
 C_SRC	   = $(wildcard $(SRCDIR)/kernel/*.c $(SRCDIR)/kernel/**/*.c)
 C_OBJ      = $(patsubst $(SRCDIR)/%.c, $(OUTDIR)/%.o, $(C_SRC))
 GRUB_CFG   = src/boot/grub.cfg

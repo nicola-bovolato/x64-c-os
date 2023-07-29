@@ -30,8 +30,10 @@ typedef struct {
     page_entry_t entries[PAGE_ENTRIES];
 } page_table_t;
 
-void* get_physical_address(void* virtual_address);
-void  map_page_to_frame(page_entry_t page, uint8_t* frame_ptr);
-void  unmap_page(page_entry_t page);
+void init_paging(uint32_t* multiboot_header);
+
+// void* get_physical_address(void* virtual_address);
+// void  map_page_to_frame(page_entry_t page, uint8_t* frame_ptr);
+// void  unmap_page(page_entry_t page);
 
 #endif

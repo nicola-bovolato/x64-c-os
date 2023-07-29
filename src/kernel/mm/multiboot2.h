@@ -55,7 +55,7 @@ typedef struct {
 #define MULTIBOOT_MEMORY_NVS              4
 #define MULTIBOOT_MEMORY_BADRAM           5
     uint32_t type;
-    uint32_t _; // reserved
+    uint32_t : 32; // reserved
 } multiboot_mmap_entry_t;
 
 typedef struct {
@@ -103,7 +103,7 @@ typedef struct {
     uint32_t part;
 } multiboot_tag_bootdev_t;
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
     uint32_t               type;
     uint32_t               size;
     uint32_t               entry_size;
@@ -111,7 +111,7 @@ typedef struct {
     multiboot_mmap_entry_t entries[];
 } multiboot_tag_mmap_t;
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
     uint32_t                type;
     uint32_t                size;
     uint32_t                num;

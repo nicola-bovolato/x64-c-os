@@ -1,4 +1,5 @@
 #include "frame.h"
+#include "../drivers/tty.h"
 #include "../log.h"
 #include "multiboot2.h"
 #include <stdint.h>
@@ -17,13 +18,22 @@ void init_frame_allocator() {
     next_free_frame            = system_memory.start;
     end_of_memory              = system_memory.end;
 
-    size_t used_regions_size = get_used_mem_regions(used_regions);
+    used_regions_size = get_used_mem_regions(used_regions);
+    used_regions[used_regions_size++]
+        = (mem_region_t){.start = (uint8_t*)VGA_MEM_START, .end = (uint8_t*)VGA_MEM_END};
+    used_regions[used_regions_size++] = get_multiboot_mem_region();
+    used_regions[used_regions_size++] = get_kernel_mem_region();
     if (used_regions_size > MAX_USED_REGIONS)
         PANIC(
             "Used memory regions (%d) exceed maximum allowed (%d)",
             used_regions_size,
             MAX_USED_REGIONS
         );
+#ifdef DEBUG
+    DEBUG("Used memory regions:\n");
+    for (size_t i = 0; i < used_regions_size; i++)
+        DEBUG("\t%d) start = %p, end = %p\n", i, used_regions[i].start, used_regions[i].end);
+#endif
 }
 
 

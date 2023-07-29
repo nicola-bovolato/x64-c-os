@@ -65,9 +65,16 @@ mem_region_t get_system_mem_region() {
 
 // Returns the memory region used by the multiboot struct
 mem_region_t get_multiboot_mem_region() {
-    return (mem_region_t
-    ){.start = (uint8_t*)multiboot_info_ptr,
-      .end   = (uint8_t*)multiboot_info_ptr + (*multiboot_info_ptr) - 1};
+    mem_region_t mem_region
+        = {.start = (uint8_t*)multiboot_info_ptr,
+           .end   = (uint8_t*)multiboot_info_ptr + (*multiboot_info_ptr) - 1};
+    DEBUG(
+        "Multiboot struct: start = %p, end = %p, size = %p\n",
+        mem_region.start,
+        mem_region.end,
+        mem_region.end - mem_region.start + 1
+    );
+    return mem_region;
 }
 
 // Returns the memory region used by the kernel
@@ -75,23 +82,39 @@ mem_region_t get_kernel_mem_region() {
 
     multiboot_tag_elf_sections_t* sections_tag
         = (multiboot_tag_elf_sections_t*)get_tag(MULTIBOOT_TAG_TYPE_ELF_SECTIONS);
-    int                      remaining = sections_tag->num;
+    size_t                   remaining = sections_tag->num;
     multiboot_elf_section_t* section   = sections_tag->sections;
 
     uint8_t* min = (uint8_t*)-1;
     uint8_t* max = 0;
 
+    DEBUG("Elf sections:\n");
     while (remaining > 0) {
         if (section->type != MULTIBOOT_ELF_SECTION_UNUSED) {
             if (min > (uint8_t*)section->address) min = (uint8_t*)section->address;
             if (max < (uint8_t*)section->address)
                 max = (uint8_t*)(section->address + section->size - 1);
         }
+        DEBUG(
+            "\t address = %p, size = %p, flags = %p\n",
+            section->address,
+            section->size,
+            section->flags
+        );
         remaining--;
-        section++;
+        section = (multiboot_elf_section_t*)(((uint8_t*)section) + sections_tag->entsize);
     }
 
-    return (mem_region_t){.start = min, .end = max};
+    mem_region_t mem_region = {.start = min, .end = max};
+
+    DEBUG(
+        "Kernel: start = %p, end = %p, size = %p\n",
+        mem_region.start,
+        mem_region.end,
+        mem_region.end - mem_region.start + 1
+    );
+
+    return mem_region;
 }
 
 // Returns the number of memory regions
