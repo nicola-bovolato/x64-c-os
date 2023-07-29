@@ -8,6 +8,16 @@
 #define PAGE_ENTRIES 512
 
 typedef union {
+#define PAGE_FLAG_PRESENT        0b000000001
+#define PAGE_FLAG_WRITABLE       0b000000010
+#define PAGE_FLAG_USER_ACCESIBLE 0b000000100
+#define PAGE_FLAG_WRITE_THROUGH  0b000001000
+#define PAGE_FLAG_NO_CACHE       0b000010000
+#define PAGE_FLAG_ACCESSED       0b000100000
+#define PAGE_FLAG_DIRTY          0b001000000
+#define PAGE_FLAG_HUGE_PAGE      0b010000000
+#define PAGE_FLAG_GLOBAL         0b100000000
+#define PAGE_FLAG_MASK           0b111111111
     struct {
         bool present         : 1;
         bool writable        : 1;
