@@ -112,13 +112,16 @@ void init_paging(uint32_t* multiboot_header) {
                 (uint8_t*)phys_table4_ptr,
                 allocate_temp_frame
             );
+            // temp_page now holds the table4 address, so we can use it as a table4
+            page_table_t* temp_page_table_ptr
+                = (page_table_t*)((size_t)temp_page.fields.address * FRAME_SIZE);
             DEBUG(
                 "Temp page (%p) physical address: %p\n",
                 (size_t)temp_page.fields.address * FRAME_SIZE,
                 get_physical_address(table4_ptr, (size_t)temp_page.fields.address * FRAME_SIZE)
             );
 
-            // Temporarily swap the last table4 entry with the new table4's address
+            // Temporarily set the last table4 entry with the new table4's address
             {
                 DEBUG(
                     "Last table4 entry contents (before swap): %p\n",
@@ -140,17 +143,16 @@ void init_paging(uint32_t* multiboot_header) {
                 {}
 
                 // Restore the original recursive mapping
-                table4_ptr->entries[PAGE_ENTRIES - 1].fields.address
+                temp_page_table_ptr->entries[PAGE_ENTRIES - 1].fields.address
                     = (size_t)phys_table4_ptr / FRAME_SIZE;
-                table4_ptr->entries[PAGE_ENTRIES - 1].fields.present  = true;
-                table4_ptr->entries[PAGE_ENTRIES - 1].fields.writable = true;
+                temp_page_table_ptr->entries[PAGE_ENTRIES - 1].fields.present  = true;
+                temp_page_table_ptr->entries[PAGE_ENTRIES - 1].fields.writable = true;
                 flush_tlb();
                 DEBUG(
                     "Last table4 entry contents (after swap, after remap): %p\n",
                     table4_ptr->entries[PAGE_ENTRIES - 1].bits
                 );
             }
-            // TODO: accessing temp_page after the restore triggers a page fault
             DEBUG(
                 "Temp page (%p) physical address: %p\n",
                 (size_t)temp_page.fields.address * FRAME_SIZE,
@@ -162,7 +164,6 @@ void init_paging(uint32_t* multiboot_header) {
 
 
     // TODO:
-    // - Create a new temporary pml4 table
     // - Identity map the kernel (using the correct page flags for each elf section)
     // - Add a guard page below the kernel stack to prevent stack overflows
     // - Move the temporary table to the new address
