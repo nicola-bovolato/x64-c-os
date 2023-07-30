@@ -7,7 +7,7 @@
             "cwd": "${workspaceFolder}",
             "MIMode": "gdb",
             "miDebuggerPath": "/usr/local/x86_64-elf-gcc/bin/x86_64-elf-gdb",
-            "program": "${workspaceFolder}/build/debug/kernel.bin",
+            "program": "${workspaceFolder}/build/debug/kernel.elf",
             "targetArchitecture": "x64",
             "setupCommands": [
                 {
