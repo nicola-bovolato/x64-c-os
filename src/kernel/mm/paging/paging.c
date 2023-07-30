@@ -18,8 +18,7 @@ void* get_physical_address(page_table_t* table4_ptr, void* virtual) {
 
     size_t offset = (size_t) virtual % PAGE_SIZE;
 
-    page_t page         = {.bits = 0};
-    page.fields.address = (size_t) virtual / PAGE_SIZE;
+    page_t page = {.fields.address = (size_t) virtual / PAGE_SIZE};
 
     page_table_t* table3_ptr = next_table(table4_ptr, get_table4_index(page));
     if (table3_ptr == (void*)-1) {
@@ -54,8 +53,7 @@ void identity_map(
     uint8_t*         frame_ptr,
     allocate_frame_t allocate_frame
 ) {
-    page_t page         = {.bits = 0};
-    page.fields.address = (size_t)frame_ptr / PAGE_SIZE;
+    page_t page = {.fields.address = (size_t)frame_ptr / PAGE_SIZE};
     map_page_to_frame(table4_ptr, page, page_flags, frame_ptr, allocate_frame);
 }
 
