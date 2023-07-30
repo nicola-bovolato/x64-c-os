@@ -14,14 +14,14 @@ int strlen(const char* str) {
 
 // compares strings
 // returns 0 if equal
-int strcmp(const char* str_1, const char* str_2) {
+int strcmp(const char* str1, const char* str2) {
 
-    while (*str_1 != '\0' && *str_1 == *str_2) {
-        str_1++;
-        str_2++;
+    while (*str1 != '\0' && *str1 == *str2) {
+        str1++;
+        str2++;
     }
 
-    return *(const unsigned char*)str_1 - *(const unsigned char*)str_2;
+    return *(const unsigned char*)str1 - *(const unsigned char*)str2;
 }
 
 // reverses string
@@ -102,7 +102,4 @@ void strcat(char* str, const char* append) {
 }
 
 // copy string to another string
-void strcpy(const char* source, char* dest) {
-
-    memcpy((uint8_t*)source, (uint8_t*)dest, strlen(source) + 1);
-}
+void strcpy(char* dest, const char* source) { memcpy(dest, source, strlen(source) + 1); }

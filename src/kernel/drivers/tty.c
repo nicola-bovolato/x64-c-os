@@ -104,8 +104,8 @@ static inline void scroll(int rows) {
 
     // Copies the bits from a specified row to the first one
     memcpy(
-        (uint16_t*)((size_t)VGA_MEM_START + (VGA_COLS * rows * 2)),
         (uint16_t*)VGA_MEM_START,
+        (uint16_t*)((size_t)VGA_MEM_START + (VGA_COLS * rows * 2)),
         to_copy
     );
 

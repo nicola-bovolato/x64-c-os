@@ -7,7 +7,7 @@ GDB 	  := /usr/local/x86_64-elf-gcc/bin/x86_64-elf-gdb
 
 ASMFLAGS  := -f elf64 -I src/boot
 LDFLAGS   := --nmagic # Disables automatic section alignment
-CCFLAGS   := -std=c99 -ffreestanding -mno-red-zone -nostdlib -O0 -Wall -Wextra -fno-asynchronous-unwind-tables
+CCFLAGS   := -Wall -Wextra -std=c99 -pedantic -ffreestanding -nostdlib -mno-red-zone -fno-asynchronous-unwind-tables -O0
 
 SRCDIR     = src
 OUTDIR     = build/$(TARGET)

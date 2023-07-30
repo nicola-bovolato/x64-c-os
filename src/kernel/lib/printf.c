@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 // size of a pointer + 2 bytes for hex representation + 1 byte for string termination
-#define NUMERIC_BUFFER_SIZE sizeof(void) + 2 + 1
+#define NUMERIC_BUFFER_SIZE sizeof(void*) + 2 + 1
 
 static inline void print_ulong_hex(unsigned long num);
 static inline void print_uint_hex(unsigned int num);

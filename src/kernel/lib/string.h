@@ -7,9 +7,9 @@ void ultoa(unsigned long number, char* dest, unsigned int base);
 void ltoa(long number, char* dest, unsigned int base);
 
 int strlen(const char* str);
-int strcmp(const char* str_1, const char* str_2);
+int strcmp(const char* str1, const char* str2);
 
-void strcpy(const char* src, char* dest);
+void strcpy(char* dest, const char* source);
 void strrev(char* str);
 
 void strcat(char* str, const char* append);

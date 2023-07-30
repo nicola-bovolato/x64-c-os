@@ -6,11 +6,11 @@
 #ifndef MULTIBOOT_H
 #define MULTIBOOT_H
 
-#include "memlayout.h"
+#include "mm.h"
 #include <stddef.h>
 #include <stdint.h>
 
-void init_multiboot_info(uint32_t* address);
+void init_multiboot_info(void* address);
 
 size_t get_used_mem_regions(mem_region_t* regions);
 
@@ -103,7 +103,7 @@ typedef struct {
     uint32_t part;
 } multiboot_tag_bootdev_t;
 
-typedef struct __attribute__((__packed__)) {
+typedef struct {
     uint32_t               type;
     uint32_t               size;
     uint32_t               entry_size;
@@ -111,7 +111,9 @@ typedef struct __attribute__((__packed__)) {
     multiboot_mmap_entry_t entries[];
 } multiboot_tag_mmap_t;
 
-typedef struct __attribute__((__packed__)) {
+
+// This struct would occupy 24 bits instead of 20
+typedef struct __attribute__((packed)) {
     uint32_t                type;
     uint32_t                size;
     uint32_t                num;

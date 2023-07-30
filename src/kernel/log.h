@@ -37,7 +37,7 @@
         __LOG(__VA_ARGS__);              \
     } while (0);
 #else
-#define DEBUG(...) (void)(__VA_ARGS__)
+#define DEBUG(...) (void)(0)
 #endif
 
 #endif

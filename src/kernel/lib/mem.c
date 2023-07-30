@@ -8,7 +8,7 @@ void* memset(void* destination, uint8_t value, size_t length) {
     return destination;
 }
 
-void* memcpy(const void* source, void* destination, size_t length) {
+void* memcpy(void* destination, const void* source, size_t length) {
     uint8_t*       dest = (uint8_t*)destination;
     const uint8_t* src  = (uint8_t*)source;
 
@@ -17,7 +17,7 @@ void* memcpy(const void* source, void* destination, size_t length) {
     return destination;
 }
 
-void* memmove(const void* source, void* destination, size_t length) {
+void* memmove(void* destination, const void* source, size_t length) {
     uint8_t*       dest = (uint8_t*)destination;
     const uint8_t* src  = (uint8_t*)source;
 
@@ -28,7 +28,7 @@ void* memmove(const void* source, void* destination, size_t length) {
     if (src < dest) {
         for (int i = length - 1; i >= 0; i--) dest[i] = src[i];
     }
-    else return memcpy(source, destination, length);
+    else return memcpy(destination, source, length);
 
 
     return destination;

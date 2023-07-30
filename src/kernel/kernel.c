@@ -1,8 +1,6 @@
 #include "./drivers/tty.h"
 #include "./lib/printf.h"
-#include "./mm/frame.h"
-#include "./mm/multiboot2.h"
-#include "./mm/paging.h"
+#include "./mm/mm.h"
 #include "log.h"
 
 #if defined(__linux__)
@@ -13,7 +11,7 @@
 #error "The kernel needs to be compiled with an x86_64-elf compiler"
 #endif
 
-void kernel_main(uint32_t* multiboot_header) {
+void kernel_main(void* multiboot_header) {
 
     clear_screen();
     set_color(VGA_WHITE, VGA_GREEN);
@@ -24,7 +22,8 @@ void kernel_main(uint32_t* multiboot_header) {
 
     // init_multiboot_info(multiboot_header);
     // init_frame_allocator();
-    init_paging(multiboot_header);
+    // init_paging(multiboot_header);
+    init_mm(multiboot_header);
 
     // printf("Frame allocator test:\n");
     // int i = 0;
@@ -36,8 +35,8 @@ void kernel_main(uint32_t* multiboot_header) {
     // printf("Page allocation test:\n");
 
     // uint64_t     address = 42 * 512 * 512 * 4096L; // 42th P3 entry
-    // page_entry_t page    = {.bits = 0};
-    // page.fields.address  = address / FRAME_SIZE;
+    // page_t page    = {.bits = 0};
+    // page.fields.address  = address / PAGE_SIZE;
 
     // void* frame = allocate_frame();
 
