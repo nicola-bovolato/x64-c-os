@@ -15,6 +15,7 @@ typedef struct {
 temp_allocator_t temp_allocator;
 
 
+// required to use the other functions
 inline void init_temp_allocator() {
     for (int i = 0; i < MAX_TEMP_ALLOCATOR_FRAMES; i++) temp_allocator.frames[i] = allocate_frame();
 }

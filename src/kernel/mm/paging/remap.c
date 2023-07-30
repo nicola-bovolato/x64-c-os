@@ -8,7 +8,8 @@
 #include "page.h"
 #include "paging.h"
 
-
+// Remaps the kernel and other important memory areas onto a the new table4
+// The pages will now have the correct flags
 void remap_kernel() {
     page_t temp_page         = {.bits = 0};
     temp_page.fields.address = 0xdeadbeef;

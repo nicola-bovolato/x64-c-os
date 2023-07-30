@@ -10,7 +10,7 @@ static inline multiboot_tag_t* get_tag(uint32_t tag_type);
 static inline size_t           get_mem_regions_number(multiboot_tag_mmap_t* memmap);
 
 
-// required to use all of the folowing functions
+// required to use the other functions
 void init_multiboot_info(void* address) {
     if ((((uint64_t)address) & 7) != 0) PANIC("Multiboot address is not aligned (%d)", address);
     if (address == (void*)-1) PANIC("Multiboot address is not initialized");

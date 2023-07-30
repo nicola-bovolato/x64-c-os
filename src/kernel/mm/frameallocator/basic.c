@@ -1,8 +1,7 @@
 #include "basic.h"
+#include "../../lib/mem.h"
 #include "../../lib/sort.h"
 #include "../../log.h"
-#include "../memregion.h"
-#include "../multiboot2.h"
 #include "../paging/page.h"
 #include <stdint.h>
 
@@ -22,25 +21,24 @@ static uint8_t* end_of_memory   = 0x0;
 static inline int compare_mem_regions(const void* a, const void* b);
 
 
-// required to use all of the folowing functions
-void init_frame_allocator() {
-    mem_region_t system_memory = get_system_mem_region();
-    next_free_frame            = system_memory.start;
-    end_of_memory              = system_memory.end;
-
-    used_regions_size = get_used_mem_regions(used_regions);
-    used_regions[used_regions_size++]
-        = (mem_region_t){.start = (uint8_t*)VGA_MEM_START, .end = (uint8_t*)VGA_MEM_END};
-    used_regions[used_regions_size++] = get_multiboot_mem_region();
-    used_regions[used_regions_size++] = get_kernel_mem_region();
-    if (used_regions_size > MAX_USED_REGIONS)
+// required to use the other functions
+void init_frame_allocator(
+    mem_region_t system_memory, const mem_region_t* _used_regions, size_t _used_regions_size
+) {
+    if (_used_regions_size > MAX_USED_REGIONS)
         PANIC(
             "Used memory regions (%d) exceed maximum allowed (%d)",
             used_regions_size,
             MAX_USED_REGIONS
         );
 
-    qsort(used_regions, used_regions_size, sizeof used_regions[0], compare_mem_regions);
+    next_free_frame   = system_memory.start;
+    end_of_memory     = system_memory.end;
+    used_regions_size = _used_regions_size;
+    memcpy(used_regions, _used_regions, sizeof(mem_region_t) * used_regions_size);
+
+    qsort(used_regions, used_regions_size, sizeof(mem_region_t), compare_mem_regions);
+
 #ifdef DEBUG
     DEBUG("Used memory regions:\n");
     for (size_t i = 0; i < used_regions_size; i++)
