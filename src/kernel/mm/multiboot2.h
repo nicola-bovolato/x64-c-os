@@ -6,9 +6,12 @@
 #ifndef MULTIBOOT_H
 #define MULTIBOOT_H
 
+
+#include "memregion.h"
 #include "mm.h"
 #include <stddef.h>
 #include <stdint.h>
+
 
 void init_multiboot_info(void* address);
 
@@ -17,6 +20,7 @@ size_t get_used_mem_regions(mem_region_t* regions);
 mem_region_t get_system_mem_region();
 mem_region_t get_kernel_mem_region();
 mem_region_t get_multiboot_mem_region();
+
 
 // Available multiboot info tags
 #define MULTIBOOT_TAG_TYPE_END              0

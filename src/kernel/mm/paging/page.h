@@ -1,11 +1,13 @@
-#ifndef PAGING_H
-#define PAGING_H
+#ifndef PAGE_H
+#define PAGE_H
 
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 
+
+#define PAGE_SIZE    0x1000
 #define PAGE_ENTRIES 512
+
 
 typedef union {
 #define PAGE_FLAG_PRESENT        0x1
@@ -40,6 +42,8 @@ typedef struct {
     page_t entries[PAGE_ENTRIES];
 } page_table_t;
 
-void init_paging();
+
+// The last entry of the page map level4 table is mapped to itself in boot.asm
+#define TABLE4_PTR ((page_table_t*)0xfffffffffffff000)
 
 #endif

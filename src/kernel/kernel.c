@@ -3,6 +3,7 @@
 #include "./mm/mm.h"
 #include "log.h"
 
+
 #if defined(__linux__)
 #error "Not using a cross compiler"
 #endif
@@ -11,49 +12,9 @@
 #error "The kernel needs to be compiled with an x86_64-elf compiler"
 #endif
 
+
 void kernel_main(void* multiboot_header) {
+    LOG("OK!\n");
 
-    clear_screen();
-    set_color(VGA_WHITE, VGA_GREEN);
-    printf("OK!\n");
-
-    set_color(VGA_WHITE, VGA_BLACK);
-
-
-    // init_multiboot_info(multiboot_header);
-    // init_frame_allocator();
-    // init_paging(multiboot_header);
     init_mm(multiboot_header);
-
-    // printf("Frame allocator test:\n");
-    // int i = 0;
-    // while (true) {
-    //     printf("(%d)Allocated: %p\n", i, allocate_frame());
-    //     i++;
-    // }
-
-    // printf("Page allocation test:\n");
-
-    // uint64_t     address = 42 * 512 * 512 * 4096L; // 42th P3 entry
-    // page_t page    = {.bits = 0};
-    // page.fields.address  = address / PAGE_SIZE;
-
-    // void* frame = allocate_frame();
-
-    // printf("Frame addr: %p\n", frame);
-    // printf(
-    //     "Initial pointed page addr (should be (*void) -1): %p\n",
-    //     get_physical_address((void*)address)
-    // );
-
-    // map_page_to_frame(page, frame);
-    // printf("After mapping: %p == %p (frame) \n", get_physical_address((void*)address), frame);
-
-    // printf("Contents of the page (random): %p \n", *((uint64_t*)page.bits));
-
-    // unmap_page(page);
-    // printf("After unmapping: %p\n", get_physical_address((void*)address));
-
-    // // Reading after unmapping will cause a page fault
-    // // printf("Contents of the page: %p \n", *((uint64_t*)page.bits));
 }

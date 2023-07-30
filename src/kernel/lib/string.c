@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+
 // returns string length
 int strlen(const char* str) {
     int length = 0;

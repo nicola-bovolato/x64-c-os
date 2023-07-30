@@ -3,12 +3,15 @@
 #include "mem.h"
 #include <stdint.h>
 
+
 static inline void swap(void* a, void* b, size_t size);
 static void        _qsort(void* arr, size_t size, long start, long end, compare_t compare);
+
 
 void qsort(void* arr, size_t length, size_t size, compare_t compare) {
     _qsort(arr, size, 0, (long)length - 1, compare);
 }
+
 
 static inline void swap(void* a, void* b, size_t size) {
     uint8_t buf[size];

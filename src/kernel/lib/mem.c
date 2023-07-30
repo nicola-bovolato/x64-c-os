@@ -1,5 +1,6 @@
 #include "mem.h"
 
+
 void* memset(void* destination, uint8_t value, size_t length) {
     uint8_t* dest = (uint8_t*)destination;
 

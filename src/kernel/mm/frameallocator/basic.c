@@ -1,9 +1,14 @@
-#include "frame.h"
-#include "../drivers/tty.h"
-#include "../lib/sort.h"
-#include "../log.h"
-#include "multiboot2.h"
+#include "basic.h"
+#include "../../lib/sort.h"
+#include "../../log.h"
+#include "../memregion.h"
+#include "../multiboot2.h"
+#include "../paging/page.h"
 #include <stdint.h>
+
+
+// if PAGE_SIZE = 0x1000, FRAME_MASK = 0xFFFFFFFFFFFFF000
+#define FRAME_MASK (~((size_t)PAGE_SIZE - 1))
 
 #define MAX_USED_REGIONS 20
 
@@ -14,11 +19,8 @@ static uint8_t* next_free_frame = (uint8_t*)-1;
 static uint8_t* end_of_memory   = 0x0;
 
 
-static inline int compare_mem_regions(const void* a, const void* b) {
-    if (((mem_region_t*)a)->start > ((mem_region_t*)b)->start) return 1;
-    if (((mem_region_t*)a)->start < ((mem_region_t*)b)->start) return -1;
-    return 0;
-}
+static inline int compare_mem_regions(const void* a, const void* b);
+
 
 // required to use all of the folowing functions
 void init_frame_allocator() {
@@ -78,3 +80,9 @@ void* allocate_frame() {
 
 // to implement
 void deallocate_frame(void* address) {}
+
+static inline int compare_mem_regions(const void* a, const void* b) {
+    if (((mem_region_t*)a)->start > ((mem_region_t*)b)->start) return 1;
+    if (((mem_region_t*)a)->start < ((mem_region_t*)b)->start) return -1;
+    return 0;
+}

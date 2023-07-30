@@ -4,8 +4,10 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+
 // size of a pointer + 2 bytes for hex representation + 1 byte for string termination
 #define NUMERIC_BUFFER_SIZE sizeof(void*) + 2 + 1
+
 
 static inline void print_ulong_hex(unsigned long num);
 static inline void print_uint_hex(unsigned int num);
@@ -13,6 +15,7 @@ static inline void print_uint(unsigned int num);
 static inline void print_int(int num);
 
 static char num_buf[NUMERIC_BUFFER_SIZE];
+
 
 void printf(char* str, ...) {
     va_list args;

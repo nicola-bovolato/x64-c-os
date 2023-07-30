@@ -3,10 +3,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+
 static uint16_t* const vga_mem_end = (uint16_t*)(VGA_MEM_START + (VGA_ROWS * VGA_COLS - 1) * 2);
 
 static uint16_t* cursor    = (uint16_t*)VGA_MEM_START;
 static uint8_t   vga_color = VGA_BLACK << 4 | VGA_WHITE;
+
 
 static inline void print_char_internal(char to_print);
 static inline void scroll(int rows);
@@ -15,6 +17,7 @@ static inline void   set_row(size_t row);
 static inline void   set_col(size_t col);
 static inline size_t get_row();
 static inline size_t get_col();
+
 
 void set_color(vga_colors foreground, vga_colors background) {
     // 4 low bits = foreground, 3 high bits = background
@@ -48,6 +51,7 @@ void print_line(char* str) {
 
     set_col(0);
 }
+
 
 static inline void print_char_internal(char to_print) {
     *cursor = vga_color << 8 | to_print;

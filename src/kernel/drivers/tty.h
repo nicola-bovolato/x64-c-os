@@ -1,10 +1,12 @@
 #ifndef TTY_H
 #define TTY_H
 
+
 #define VGA_MEM_START 0xb8000
 #define VGA_COLS      80
 #define VGA_ROWS      25
 #define VGA_MEM_END   VGA_MEM_START + VGA_ROWS* VGA_COLS * 2
+
 
 typedef enum {
     VGA_BLACK         = 0x0,
@@ -24,6 +26,7 @@ typedef enum {
     VGA_LIGHT_BROWN   = 0xe,
     VGA_WHITE         = 0xf,
 } vga_colors;
+
 
 void set_color(vga_colors foreground, vga_colors background);
 

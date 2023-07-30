@@ -12,10 +12,10 @@ CCFLAGS   := -Wall -Wextra -std=c99 -pedantic -ffreestanding -nostdlib -mno-red-
 SRCDIR     = src
 OUTDIR     = build/$(TARGET)
 
-ASM_SRC    = $(wildcard $(SRCDIR)/boot/*.asm)
+ASM_SRC    = $(shell find src/ -type f -name '*.asm')
 ASM_OBJ    = $(patsubst $(SRCDIR)/%.asm, $(OUTDIR)/%.o, $(ASM_SRC))
-C_HEADERS  = $(wildcard $(SRCDIR)/kernel/*.h $(SRCDIR)/kernel/**/*.h)
-C_SRC	   = $(wildcard $(SRCDIR)/kernel/*.c $(SRCDIR)/kernel/**/*.c)
+C_HEADERS  = $(shell find src/ -type f -name '*.h')
+C_SRC	   = $(shell find src/ -type f -name '*.c')
 C_OBJ      = $(patsubst $(SRCDIR)/%.c, $(OUTDIR)/%.o, $(C_SRC))
 GRUB_CFG   = src/boot/grub.cfg
 LDFILE     = src/boot/linker.$(TARGET).ld

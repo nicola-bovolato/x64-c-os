@@ -1,15 +1,17 @@
 #ifndef LOG_H
 #define LOG_H
 
+
 #include "drivers/tty.h"
 #include "lib/printf.h"
+
 
 // No, I'm not going to implement vprintf right now
 #define __LOG(...) printf(__VA_ARGS__)
 
 #define LOG(...)                             \
     do {                                     \
-        set_color(VGA_BLACK, VGA_DARK_GREY); \
+        set_color(VGA_WHITE, VGA_DARK_GREY); \
         print("LOG:");                       \
         set_color(VGA_WHITE, VGA_BLACK);     \
         print_char(' ');                     \

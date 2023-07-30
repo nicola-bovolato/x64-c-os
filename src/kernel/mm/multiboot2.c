@@ -2,11 +2,13 @@
 #include "../log.h"
 #include <stdbool.h>
 
+
 static uint8_t* multiboot_info_ptr = (uint8_t*)-1;
 
-static inline multiboot_tag_t* get_tag(uint32_t tag_type);
 
-static inline size_t get_mem_regions_number(multiboot_tag_mmap_t* memmap);
+static inline multiboot_tag_t* get_tag(uint32_t tag_type);
+static inline size_t           get_mem_regions_number(multiboot_tag_mmap_t* memmap);
+
 
 // required to use all of the folowing functions
 void init_multiboot_info(void* address) {
@@ -117,6 +119,7 @@ mem_region_t get_kernel_mem_region() {
 
     return mem_region;
 }
+
 
 // Returns the number of memory regions
 static inline size_t get_mem_regions_number(multiboot_tag_mmap_t* memmap) {

@@ -1,6 +1,7 @@
 #ifndef STRING_H
 #define STRING_H
 
+
 void utoa(unsigned int number, char* dest, unsigned int base);
 void itoa(int number, char* dest, unsigned int base);
 void ultoa(unsigned long number, char* dest, unsigned int base);
