@@ -1,16 +1,16 @@
 TARGET    ?=
 
+SRCDIR     = src
+OUTDIR     = build/$(TARGET)
+
 ASM 	  := nasm
 LD 		  := /usr/local/x86_64-elf-gcc/bin/x86_64-elf-ld
 CC 		  := /usr/local/x86_64-elf-gcc/bin/x86_64-elf-gcc
 GDB 	  := /usr/local/x86_64-elf-gcc/bin/x86_64-elf-gdb
 
-ASMFLAGS  := -f elf64 -I src/boot
+ASMFLAGS   = -f elf64 -I $(SRCDIR)/boot
 LDFLAGS   := --nmagic # Disables automatic section alignment
-CCFLAGS   := -Wall -Wextra -std=c99 -pedantic -ffreestanding -nostdlib -mno-red-zone -fno-asynchronous-unwind-tables -O0
-
-SRCDIR     = src
-OUTDIR     = build/$(TARGET)
+CCFLAGS   := -Wall -Wextra -std=c99 -pedantic -ffreestanding -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -fno-asynchronous-unwind-tables -O0
 
 ASM_SRC    = $(shell find src/ -type f -name '*.asm')
 ASM_OBJ    = $(patsubst $(SRCDIR)/%.asm, $(OUTDIR)/%.o, $(ASM_SRC))

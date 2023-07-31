@@ -31,8 +31,8 @@ tar xf binutils-2.35.tar.xz
 mkdir binutils-build
 cd binutils-build
 ../binutils-2.35/configure --target=$TARGET --prefix=$PREFIX --with-sysroot --disable-nls --disable-werror
-make -j 8
-make -j 8 all install
+make -j$(nproc)
+make install
 
 # Install gcc
 
@@ -42,10 +42,10 @@ tar xf gcc-10.2.0.tar.xz
 mkdir gcc-build
 cd gcc-build
 ../gcc-10.2.0/configure --target=$TARGET --prefix=$PREFIX --disable-nls --enable-languages=c --without-headers
-make -j 8 all-gcc
-make -j 8 all-target-libgcc
-make -j 8 install-gcc
-make -j 8 install-target-libgcc
+make -j$(nproc) all-gcc
+make -j$(nproc) all-target-libgcc
+make install-gcc
+make install-target-libgcc
 
 # Install gdb
 
@@ -55,7 +55,7 @@ tar xf gdb-9.2.tar.xz
 mkdir gdb-build
 cd gdb-build
 ../gdb-9.2/configure --target=$TARGET --prefix=$PREFIX --program-prefix=$TARGET- --with-expat
-make -j 8
-make -j 8 install
+make -j$(nproc)
+make install
 
 rm -rf $TMP_FOLDER
