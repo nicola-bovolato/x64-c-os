@@ -15,7 +15,8 @@
 
 void init_multiboot_info(void* address);
 
-size_t get_used_mem_regions(mem_region_t* regions);
+size_t get_used_mmap_regions(mem_region_t regions[]);
+size_t get_allocated_elf_sections(mem_region_t used_regions[]);
 
 mem_region_t get_system_mem_region();
 mem_region_t get_kernel_mem_region();
@@ -77,6 +78,9 @@ typedef struct {
 #define MULTIBOOT_ELF_SECTION_RESERVED                    10
 #define MULTIBOOT_ELF_SECTION_DYNAMIC_LOADER_SYMBOL_TABLE 11
     uint32_t type;
+#define MULTIBOOT_ELF_SECTION_FLAG_WRITABLE   0x1
+#define MULTIBOOT_ELF_SECTION_FLAG_ALLOCATED  0x2
+#define MULTIBOOT_ELF_SECTION_FLAG_EXECUTABLE 0x4
     uint64_t flags;
     uint64_t address;
     uint64_t file_offset;

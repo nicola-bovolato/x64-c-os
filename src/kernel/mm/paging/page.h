@@ -19,7 +19,8 @@ typedef union {
 #define PAGE_FLAG_DIRTY          0x40
 #define PAGE_FLAG_HUGE_PAGE      0x80
 #define PAGE_FLAG_GLOBAL         0x100
-#define PAGE_FLAG_MASK           0x1ff
+#define PAGE_FLAG_NO_EXECUTE     0x8000000000000000
+#define PAGE_FLAG_MASK           0x80000000000001ff
     struct {
         bool present         : 1;
         bool writable        : 1;

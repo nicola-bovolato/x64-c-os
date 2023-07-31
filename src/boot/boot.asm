@@ -178,7 +178,7 @@ pd_table:
 pt_table:
     resb 4096 * 512   ; Reserve space for 512 page tables
 stack_bottom:
-    resb 4096 * 4     ; Reserve 16 kBytes for the kernel stack
+    resb 4096 * 4     ; Reserve 16 KiBytes for the kernel stack
 stack_top:
 
 section .data

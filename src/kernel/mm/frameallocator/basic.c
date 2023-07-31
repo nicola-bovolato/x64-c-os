@@ -1,6 +1,5 @@
 #include "basic.h"
 #include "../../lib/mem.h"
-#include "../../lib/sort.h"
 #include "../../log.h"
 #include "../paging/page.h"
 #include <stdint.h>
@@ -18,12 +17,9 @@ static uint8_t* next_free_frame = (uint8_t*)-1;
 static uint8_t* end_of_memory   = 0x0;
 
 
-static inline int compare_mem_regions(const void* a, const void* b);
-
-
 // required to use the other functions
 void init_frame_allocator(
-    mem_region_t system_memory, const mem_region_t* _used_regions, size_t _used_regions_size
+    mem_region_t system_memory, const mem_region_t _used_regions[], size_t _used_regions_size
 ) {
     if (_used_regions_size > MAX_USED_REGIONS)
         PANIC(
@@ -36,8 +32,6 @@ void init_frame_allocator(
     end_of_memory     = system_memory.end;
     used_regions_size = _used_regions_size;
     memcpy(used_regions, _used_regions, sizeof(mem_region_t) * used_regions_size);
-
-    qsort(used_regions, used_regions_size, sizeof(mem_region_t), compare_mem_regions);
 
 #ifdef DEBUG
     DEBUG("Used memory regions:\n");
@@ -78,9 +72,3 @@ void* allocate_frame() {
 
 // to implement
 void deallocate_frame(void* address) {}
-
-static inline int compare_mem_regions(const void* a, const void* b) {
-    if (((mem_region_t*)a)->start > ((mem_region_t*)b)->start) return 1;
-    if (((mem_region_t*)a)->start < ((mem_region_t*)b)->start) return -1;
-    return 0;
-}

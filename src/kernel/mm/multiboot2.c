@@ -20,7 +20,7 @@ void init_multiboot_info(void* address) {
 
 // Copies all used memory regions into the first parameter
 // Ensure that when using it the array is big enough
-size_t get_used_mem_regions(mem_region_t* used_regions) {
+size_t get_used_mmap_regions(mem_region_t used_regions[]) {
     multiboot_tag_mmap_t* memmap = (multiboot_tag_mmap_t*)get_tag(MULTIBOOT_TAG_TYPE_MMAP);
     size_t                used_regions_number = 0;
 
@@ -28,9 +28,10 @@ size_t get_used_mem_regions(mem_region_t* used_regions) {
         multiboot_mmap_entry_t* entry = &memmap->entries[i];
 
         if (entry->type != MULTIBOOT_MEMORY_AVAILABLE) {
-            used_regions[used_regions_number].start = (uint8_t*)entry->base_addr;
-            used_regions[used_regions_number].end
-                = (uint8_t*)(entry->base_addr + entry->length - 1);
+            used_regions[used_regions_number] = (mem_region_t){
+                .start = (uint8_t*)entry->base_addr,
+                .end   = (uint8_t*)(entry->base_addr + entry->length - 1),
+            };
             used_regions_number++;
         }
     }
@@ -66,9 +67,10 @@ mem_region_t get_system_mem_region() {
 
 // Returns the memory region used by the multiboot struct
 mem_region_t get_multiboot_mem_region() {
-    mem_region_t mem_region
-        = {.start = (uint8_t*)multiboot_info_ptr,
-           .end   = (uint8_t*)multiboot_info_ptr + (*multiboot_info_ptr) - 1};
+    mem_region_t mem_region = {
+        .start = (uint8_t*)multiboot_info_ptr,
+        .end   = (uint8_t*)multiboot_info_ptr + (*multiboot_info_ptr) - 1,
+    };
     DEBUG(
         "Multiboot struct: start = %p, end = %p, size = %p\n",
         mem_region.start,
@@ -118,6 +120,39 @@ mem_region_t get_kernel_mem_region() {
     );
 
     return mem_region;
+}
+
+// Copies all allocated (in use) memory regions into the first parameter
+// Ensure that when using it the array is big enough
+size_t get_allocated_elf_sections(mem_region_t used_regions[]) {
+    multiboot_tag_elf_sections_t* sections_tag
+        = (multiboot_tag_elf_sections_t*)get_tag(MULTIBOOT_TAG_TYPE_ELF_SECTIONS);
+
+    multiboot_elf_section_t* section             = sections_tag->sections;
+    size_t                   remaining           = sections_tag->num;
+    size_t                   used_regions_number = 0;
+
+    while (remaining > 0) {
+
+        if ((section->flags & MULTIBOOT_ELF_SECTION_FLAG_ALLOCATED)
+            == MULTIBOOT_ELF_SECTION_FLAG_ALLOCATED) {
+            used_regions[used_regions_number] = (mem_region_t){
+                .start    = (uint8_t*)section->address,
+                .end      = (uint8_t*)(section->address + section->size - 1),
+                .readable = true,
+                .writable = (section->flags & MULTIBOOT_ELF_SECTION_FLAG_WRITABLE)
+                         == MULTIBOOT_ELF_SECTION_FLAG_WRITABLE,
+                .executable = (section->flags & MULTIBOOT_ELF_SECTION_FLAG_EXECUTABLE)
+                           == MULTIBOOT_ELF_SECTION_FLAG_EXECUTABLE,
+            };
+            used_regions_number++;
+        }
+
+        section = (multiboot_elf_section_t*)(((uint8_t*)section) + sections_tag->entsize);
+        remaining--;
+    }
+
+    return used_regions_number;
 }
 
 

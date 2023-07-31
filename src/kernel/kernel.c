@@ -14,7 +14,7 @@
 
 
 void kernel_main(void* multiboot_header) {
-    LOG("OK!\n");
+    LOG("Kernel booted!\n");
 
     init_mm(multiboot_header);
 }
