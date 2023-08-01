@@ -1,5 +1,5 @@
-#ifndef FRAME_ALLOCATOR_TEMP_H
-#define FRAME_ALLOCATOR_TEMP_H
+#ifndef PAGING_TEMP_ALLOCATOR_H
+#define PAGING_TEMP_ALLOCATOR_H
 
 
 void        init_temp_allocator();

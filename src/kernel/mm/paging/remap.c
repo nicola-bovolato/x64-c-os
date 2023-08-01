@@ -1,11 +1,11 @@
 #include "remap.h"
 #include "../../cpu/cpu.h"
 #include "../../log.h"
-#include "../frameallocator/basic.h"
-#include "../frameallocator/temp.h"
+#include "../frame/allocator.h"
 #include "../multiboot2.h"
 #include "helpers.h"
 #include "paging.h"
+#include "tempallocator.h"
 
 
 static inline void initialize_new_table4(page_table_t* new_table4_addr, const page_t temp_page);

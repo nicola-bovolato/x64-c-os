@@ -1,7 +1,7 @@
 #ifndef PAGING_HELPERS_H
 #define PAGING_HELPERS_H
 
-#include "../frameallocator/frame.h"
+#include "../frame/allocator.h"
 #include "page.h"
 #include <stddef.h>
 

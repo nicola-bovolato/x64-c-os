@@ -3,11 +3,10 @@
 #include "../drivers/tty.h"
 #include "../lib/sort.h"
 #include "../log.h"
-#include "frameallocator/basic.h"
-#include "frameallocator/temp.h"
+#include "frame/allocator.h"
 #include "multiboot2.h"
-#include "paging/paging.h"
 #include "paging/remap.h"
+#include "paging/tempallocator.h"
 
 
 #define MAX_USED_REGIONS 20

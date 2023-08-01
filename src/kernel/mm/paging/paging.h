@@ -2,7 +2,7 @@
 #define PAGING_H
 
 
-#include "../frameallocator/frame.h"
+#include "../frame/allocator.h"
 #include "page.h"
 #include <stdbool.h>
 #include <stddef.h>

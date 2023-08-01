@@ -1,6 +1,6 @@
-#include "temp.h"
+#include "tempallocator.h"
 #include "../../log.h"
-#include "basic.h"
+#include "../frame/allocator.h"
 
 
 // temp allocator is used to map one page at a time
