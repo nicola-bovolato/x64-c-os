@@ -14,8 +14,8 @@ inline void zero_table_entries(page_table_t* table) {
     for (int i = 0; i < PAGE_ENTRIES; i++) table->entries[i].bits = 0;
 }
 
-inline page_table_t* next_table(page_table_t* table, size_t index) {
-    page_t* entry = &(table->entries[index]);
+inline page_table_t* next_table(const page_table_t* table, size_t index) {
+    const page_t* entry = &(table->entries[index]);
     if (!entry->fields.present) return (void*)-1;
     if (entry->fields.huge_page)
         PANIC("Huge pages not supported! (Table entry %d is a huge page)", entry->bits);

@@ -8,7 +8,7 @@
 #define HIGHER_HALF_BOTTOM_ADDRESS 0xffff800000000000
 
 
-void* get_physical_address(void* virtual) {
+const void* get_physical_address(void* virtual) {
 
     if ((size_t) virtual > LOWER_HALF_TOP_ADDRESS
         && (size_t) virtual < HIGHER_HALF_BOTTOM_ADDRESS) {
@@ -47,13 +47,13 @@ void* get_physical_address(void* virtual) {
     return (void*)((size_t)table1_entry.fields.address * PAGE_SIZE + offset);
 }
 
-void identity_map(uint64_t page_flags, uint8_t* frame_ptr, allocate_frame_t allocate_frame) {
+void identity_map(uint64_t page_flags, const void* frame_ptr, allocate_frame_t allocate_frame) {
     page_t page = {.fields.address = (size_t)frame_ptr / PAGE_SIZE};
     map_page_to_frame(page, page_flags, frame_ptr, allocate_frame);
 }
 
 void map_page_to_frame(
-    page_t page, uint64_t page_flags, uint8_t* frame_ptr, allocate_frame_t allocate_frame
+    page_t page, uint64_t page_flags, const void* frame_ptr, allocate_frame_t allocate_frame
 ) {
 
     page_table_t* table3_ptr
@@ -105,7 +105,7 @@ void unmap_page(page_t page, deallocate_frame_t deallocate_frame, bool panic_on_
         return;
     }
 
-    void* frame_ptr = (void*)((size_t)table1_entry->fields.address * PAGE_SIZE);
+    const void* frame_ptr = (void*)((size_t)table1_entry->fields.address * PAGE_SIZE);
 
     table1_entry->bits = 0;
     flush_tlb_page((void*)page.bits);

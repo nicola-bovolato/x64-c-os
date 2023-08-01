@@ -43,7 +43,7 @@ void init_frame_allocator(
 
 // Selects a free frame based excluding used memory regions and returns it
 // Increases the next free frame pointer
-void* allocate_frame() {
+const void* allocate_frame() {
     if (next_free_frame + PAGE_SIZE >= end_of_memory)
         PANIC("No free frames (%x > %x)", next_free_frame, end_of_memory);
 
@@ -71,4 +71,4 @@ void* allocate_frame() {
 }
 
 // to implement
-void deallocate_frame(void* address) {}
+void deallocate_frame(const void* address) {}

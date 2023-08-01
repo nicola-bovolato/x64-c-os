@@ -5,8 +5,7 @@
 #define VGA_MEM_START 0xb8000
 #define VGA_COLS      80
 #define VGA_ROWS      25
-#define VGA_MEM_END   VGA_MEM_START + VGA_ROWS* VGA_COLS * 2
-
+#define VGA_MEM_END   (VGA_MEM_START + (VGA_ROWS * VGA_COLS * 2) - 1)
 
 typedef enum {
     VGA_BLACK         = 0x0,
@@ -31,8 +30,8 @@ typedef enum {
 void set_color(vga_colors foreground, vga_colors background);
 
 void print_char(char to_print);
-void print(char* str);
-void print_line(char* str);
+void print(const char* str);
+void print_line(const char* str);
 
 void clear_screen();
 

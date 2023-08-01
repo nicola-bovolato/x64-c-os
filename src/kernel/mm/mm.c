@@ -50,25 +50,7 @@ void init_mm(void* multiboot_header) {
     used_mem_regions[used_mem_regions_size++] = multiboot_mem_region;
     qsort(used_mem_regions, used_mem_regions_size, sizeof(mem_region_t), compare_mem_regions);
 
-    // Avoid triggering cpu exceptions when marking a page as not executable
-    enable_nxe_bit();
-    void* old_table_addr = (void*)read_cr3();
-    void* new_table_addr = remap_kernel(used_mem_regions, used_mem_regions_size);
-    // Remove write access to not writable pages
-    enable_write_protect_bit();
-
-    write_cr3((uint64_t)new_table_addr);
-
-    // Transform the old p4 table in a guard page (by unmapping it)
-    // The kernel stack is right under the old page tables, so:
-    // - a stack overflow triggers a page fault
-    // - we increased the kernel stack size by:
-    //    - 1   table3 (4KiB)
-    //    - 1   table2 (4KiB)
-    //    - 512 table1 (2MiB)
-    unmap_page(
-        (page_t){.fields.address = (size_t)old_table_addr / PAGE_SIZE}, deallocate_frame, true
-    );
+    const void* new_table_addr = remap_kernel(used_mem_regions, used_mem_regions_size);
 
     LOG("MMU initialized!\n");
 }

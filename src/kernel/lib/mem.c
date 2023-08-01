@@ -1,8 +1,8 @@
 #include "mem.h"
 
 
-void* memset(void* destination, uint8_t value, size_t length) {
-    uint8_t* dest = (uint8_t*)destination;
+void* memset(void* destination, char value, size_t length) {
+    char* dest = (char*)destination;
 
     while (length-- > 0) *dest++ = value;
 
@@ -10,8 +10,8 @@ void* memset(void* destination, uint8_t value, size_t length) {
 }
 
 void* memcpy(void* destination, const void* source, size_t length) {
-    uint8_t*       dest = (uint8_t*)destination;
-    const uint8_t* src  = (uint8_t*)source;
+    char*       dest = (char*)destination;
+    const char* src  = (char*)source;
 
     while (length-- > 0) *dest++ = *src++;
 
@@ -19,8 +19,8 @@ void* memcpy(void* destination, const void* source, size_t length) {
 }
 
 void* memmove(void* destination, const void* source, size_t length) {
-    uint8_t*       dest = (uint8_t*)destination;
-    const uint8_t* src  = (uint8_t*)source;
+    char*       dest = (char*)destination;
+    const char* src  = (char*)source;
 
     // memmove checks if source and destination buffers overlap
     // if the buffers don't overlap the direction it copies from doesn't matter

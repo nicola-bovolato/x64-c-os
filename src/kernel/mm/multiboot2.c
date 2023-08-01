@@ -7,7 +7,7 @@ static uint8_t* multiboot_info_ptr = (uint8_t*)-1;
 
 
 static inline multiboot_tag_t* get_tag(uint32_t tag_type);
-static inline size_t           get_mem_regions_number(multiboot_tag_mmap_t* memmap);
+static inline size_t           get_mem_regions_number(const multiboot_tag_mmap_t* memmap);
 
 
 // required to use the other functions
@@ -157,7 +157,7 @@ size_t get_allocated_elf_sections(mem_region_t used_regions[]) {
 
 
 // Returns the number of memory regions
-static inline size_t get_mem_regions_number(multiboot_tag_mmap_t* memmap) {
+static inline size_t get_mem_regions_number(const multiboot_tag_mmap_t* memmap) {
     return ((size_t)memmap->size - (sizeof memmap)) / (size_t)memmap->entry_size;
 }
 
